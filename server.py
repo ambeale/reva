@@ -1,4 +1,4 @@
-"""Movie Ratings."""
+"""Food-focused Restuarant Reviews."""
 
 from jinja2 import StrictUndefined
 
@@ -6,7 +6,11 @@ from flask import (Flask, render_template, redirect, request, flash,
                    session)
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import User, Rating, Movie, connect_to_db, db
+from model import User, connect_to_db, db
+
+import os, requests
+
+#import json
 
 
 app = Flask(__name__)
@@ -14,9 +18,7 @@ app = Flask(__name__)
 # Required to use Flask sessions and the debug toolbar
 app.secret_key = "ABC"
 
-# Normally, if you use an undefined variable in Jinja2, it fails
-# silently. This is horrible. Fix this so that, instead, it raises an
-# error.
+# Force jinja to fail loudly
 app.jinja_env.undefined = StrictUndefined
 
 
@@ -26,158 +28,35 @@ def index():
     return render_template("homepage.html")
 
 
-@app.route('/users')
-def user_list():
-    """Show list of users"""
+@app.route('/restaurant-search')
+def display_restaurants():
+    """Call Google API with given search terms and return restaurants"""
 
-    users = User.query.all()
-    return render_template("user_list.html", users=users)
+    term = request.args.get('search-term')
+    location = request.args.get('location')
 
+    response = restaurant_api_call(term, location)
+    print(response['results'])
 
-@app.route('/users/<user_id>')
-def show_user(user_id):
-    """Show page about user"""
-
-    user = User.query.filter(User.user_id == user_id).first()
-
-    return render_template("user_info.html", user=user)
+    return render_template("search_results.html", results=response['results'])
 
 
-@app.route('/add-new')
-def add_user_form():
-    """Show new user form"""
+def restaurant_api_call(term, location):
+    """ADD DOCSTRING"""
 
-    return render_template("add_user.html")
+    search_term = term.replace(" ", "+")
+    search_location = location.replace(",","").replace(" ", "+")
+    # query = search_term + "+in+" + search_location
 
+    payload = {'query': search_term + "+in+" + search_location,
+                'key': os.environ['TEXT_SEARCH_KEY']}
+    url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
-@app.route('/add_user', methods=["POST"])
-def add_user():
-    """Add new user to database."""
-    
-    new_email = request.form.get("email")
-    password = request.form.get("password")
-    age = request.form.get("age")
-    zipcode = request.form.get("zipcode")
+    r = requests.get(url, params=payload)
+    print(r.url)
 
-    email_match = User.query.filter(User.email == new_email).first()
+    return r.json()
 
-    if email_match:
-        flash('You already exist.')
-        return redirect('/login-form')
-    else:
-        new_user = User(email=new_email, 
-                        password=password,
-                        age=age,
-                        zipcode=zipcode)
-        db.session.add(new_user)
-        db.session.commit()
-
-        flash("You've been added!")
-
-        return redirect('/')
-
-
-@app.route('/movies')
-def movie_list():
-    """Show list of movies"""
-
-    movies = Movie.query.order_by('title').all()
-
-    return render_template('movie_list.html', movies=movies)
-
-
-@app.route('/movies/<movie_id>')
-def show_movie(movie_id):
-    """Show page about movie"""
-
-    movie = Movie.query.filter(Movie.movie_id == movie_id).first()
-    # logged_in = False
-
-    # if session.get('user_id'):
-    #     logged_in = True
-
-    return render_template("movie_info.html", movie=movie)
-
-
-@app.route('/add-rating', methods=["POST"])
-def add_rating():
-    """Let user add a movie rating"""
-
-    new_rating = request.form.get("rating")
-    movie_id = request.form.get("movie_id")
-    user_id = session.get("user_id")
-
-    rating_check = Rating.query.filter(Rating.movie_id == movie_id,
-                                        Rating.user_id == user_id).first()
-
-    if rating_check:
-        #update
-        rating_check.score = new_rating
-        flash('Updated your rating!')
-
-    else:
-        rating = Rating(user_id=user_id, score=new_rating, movie_id=movie_id)
-        db.session.add(rating)
-        flash('Added your new rating!')
-
-    db.session.commit()
-
-    return redirect('/movies')
-
-
-@app.route('/login-form')
-def login_page():
-    """Show login form"""
-    # if session.get('user_id'):
-    #     #show log out
-    #     return render_template('logout_page.html')
-    # else:
-    return render_template('login_page.html')
-
-@app.route('/logout-form')
-def logout_page():
-    """Log user out"""
-
-    return render_template('logout_page.html')
-
-
-@app.route('/login', methods=["POST"])
-def user_login():
-    """Log user in"""
-
-    email = request.form.get('email')
-    password = request.form.get('password')
-
-    user_info = User.query.filter(User.email == email).first()
-
-    if user_info is None:
-        #flash you don't exist 
-        flash("""You don't exist. Are you a ghost?
-                Or did you type your email wrong?""")
-        return redirect('/')
-
-    elif user_info.password == password:
-        # go to homepage
-        flash("You're logged in!")
-        
-        session['user_id'] = user_info.user_id
-        print(session['user_id'])
-        
-        return redirect('/')
-
-    else:
-        flash("Wrong password. Try again. Be careful. Jeeeeezeeee")
-        return redirect('/login-form')
-
-
-@app.route('/logout')
-def user_logout():
-    """Log user out"""
-
-    del session['user_id']
-
-    flash("You're logged out. See you next time.")
-    return redirect('/')
 
 
 if __name__ == "__main__":
