@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Create account</h2>
+
+<form action='/create-account' method="POST">
+    First Name:
+    <input type="text" name="fname" required><br>
+    Last Name:
+    <input type="text" name="lname" required><br>
+    Email:
+    <input type="text" name="email" required><br>
+    Zipcode:
+    <input type="text" name="zipcode" required><br>
+    Password:
+    <input type="text" name="password" required><br><br>
+    <input type="submit" value="Create">
+</form>
+
+
+{% endblock %}

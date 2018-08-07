@@ -35,14 +35,10 @@ class Restaurant(db.Model):
 
     __tablename__ = "restaurants"
 
-    restaurant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    google_place_id = db.Column(db.String(200), nullable=True)
+    restaurant_id = db.Column(db.String(200), primary_key=True)
     name = db.Column(db.String(200), nullable=True)
     phone_number = db.Column(db.String(20), nullable=True)
-    street = db.Column(db.String(250), nullable=True)
-    city = db.Column(db.String(50), nullable=True)
-    state = db.Column(db.String(5), nullable=True)
-    zipcode = db.Column(db.String(15), nullable=True)
+    address = db.Column(db.String(200), nullable=True)
     lat = db.Column(db.Numeric, nullable=True)
     lon = db.Column(db.Numeric, nullable=True)
 
@@ -60,7 +56,7 @@ class Review(db.Model):
 
     review_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    restaurant_id = db.Column(db.Integer, db.ForeignKey(
+    restaurant_id = db.Column(db.String(200), db.ForeignKey(
                                                 'restaurants.restaurant_id'))
     created_at = db.Column(db.DateTime, nullable=False)
     food_score = db.Column(db.Integer, nullable=False)
@@ -127,7 +123,7 @@ class RestaurantDish(db.Model):
     restaurant_dish_id = db.Column(db.Integer, autoincrement=True,
                                                 primary_key=True)
     dish_id = db.Column(db.Integer, db.ForeignKey('dishes.dish_id'))
-    restaurant_id = db.Column(db.Integer,
+    restaurant_id = db.Column(db.String(200),
                                 db.ForeignKey('restaurants.restaurant_id'))
 
     # Relationships

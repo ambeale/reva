@@ -6,18 +6,20 @@
 <body>
     <a href="/">Food Reviews</a> |
 
-    {% for message in get_flashed_messages() %}
-        <h2> <font color="red"> {{ message }} </font></h2>
-    {% endfor %}
-    
-<!--     {% if session.get("user_id") %}
-        <a href="/logout-form">Log Out</a> 
+    {% if session.get("user_id") %}
+        <a href="/logout">Log Out</a> 
     {% else %}
         <a href="/login-form">Log In</a>
     {% endif %} 
     
-    | <a href="/add-new">Add new user</a>
-    <hr> -->
+<!--     | <a href="/add-new">Add new user</a> -->
+    <hr>
+
+    {% for message in get_flashed_messages() %}
+        <h2> <font color="red"> {{ message }} </font></h2>
+    {% endfor %}
+    
+
 
     {% block content %} Things {% endblock %}
 

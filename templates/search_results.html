@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% for result in results %}
+    <h3><a href="/{{ result["place_id"] }}">{{ result["name"] }}</a></h3>
+    {{ result["formatted_address"]}}<br>
+    Reviews: {{ result["count_reviews"]}}
+{% endfor %}
+
+{% endblock %}
