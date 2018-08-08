@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% for result in results %}
+    <h3>
+        <a href="/user/{{ result.user_id }}">
+            {{ result.fname }} {{ result.lname }}
+        </a>
+    </h3>
+    Location: {{ result.zipcode }}<br>
+    Reviews: {{ result.count_reviews }}
+{% endfor %}
+
+{% endblock %}

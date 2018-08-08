@@ -6,9 +6,12 @@ from flask import (Flask, render_template, redirect, request, flash,
                    session)
 from flask_debugtoolbar import DebugToolbarExtension
 
+from datetime import datetime
+
+from sqlalchemy import func
+
 from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
                     connect_to_db, db)
-
 import os, requests
 
 
@@ -24,6 +27,7 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def index():
     """Homepage."""
+
     return render_template("homepage.html")
 
 
@@ -113,12 +117,11 @@ def display_restaurant_results():
     # Call helper function to make Google Places API call
     response = restaurant_api_call(term, location)
     results = response['results']
-    
-    results_with_count = calculate_review_count(results)
-    print(results_with_count)
+    results_with_count = calculate_rest_review_count(results)
 
     # Render template with search results
-    return render_template("search_results.html", results=results_with_count)
+    return render_template("restaurant_search_results.html",
+                             results=results_with_count)
 
 
 def restaurant_api_call(term, location):
@@ -138,7 +141,7 @@ def restaurant_api_call(term, location):
     return r.json()
 
 
-def calculate_review_count(results):
+def calculate_rest_review_count(results):
     """Given json response, calculate number of reviews
     for each return restaurant"""
 
@@ -161,14 +164,14 @@ def display_restaurant(place_id):
 
     # If restaurant not in database, trigger Place API request
     else:
-        fields = 'name,formatted_phone_number,formatted_address,geometry'
+        fields = 'name,formatted_phone_number,formatted_address,geometry,website'
         payload = {'place_id': place_id,
                     'fields': fields,
                     'key': os.environ['PLACE_API_KEY']}
         url = 'https://maps.googleapis.com/maps/api/place/details/json?'
 
         r = requests.get(url, params=payload)
-        print(r.url)
+
         r = r.json()
         result = r['result']
 
@@ -176,6 +179,7 @@ def display_restaurant(place_id):
         name = result['name']
         phone_number = result['formatted_phone_number']
         address = result['formatted_address']
+        website = result['website']
         lat = result['geometry']['location']['lat']
         lon = result['geometry']['location']['lng']
 
@@ -184,6 +188,7 @@ def display_restaurant(place_id):
                                     name=name,
                                     phone_number=phone_number,
                                     address=address,
+                                    website=website,
                                     lat=lat,
                                     lon=lon)
 
@@ -198,18 +203,105 @@ def display_restaurant(place_id):
 def add_review():
     """Add user's review to database"""
 
-    # user_id = request.form.get("fname")
-    # restaurant_id = request.form.get("lname")
-    # created_at = 
-    # food_score = 
-    # food_comment = 
-    # service_score = 
-    # service_comment = 
-    # price_score = 
-    # price_comment = 
+    # Get review inputs
+    user_id = session.get("user_id")
+    restaurant_id = request.form.get("restaurant")
+    created_at = datetime.now()
+    food_score = request.form.get("food-score")
+    food_comment = request.form.get("food-comment")
+    service_score = request.form.get("service-score")
+    service_comment = request.form.get("service-comment")
+    price_score = request.form.get("price-score")
+    price_comment = request.form.get("price-comment")
+    
+    # Get dish inputs
+    if request.form.get("dish-name"):
+        dish_name = request.form.get("dish-name").capitalize()
+    dish_comment = request.form.get("dish-comment")
+
+    # Check if user has already reviewed restaurant
+    user_review_check = Review.query.filter_by(user_id=user_id,
+                                               restaurant_id=restaurant_id)
+    if user_review_check.first():
+        flash("You've already review this restaurant")
+    else:
+        new_review = Review(user_id=user_id,
+                            restaurant_id=restaurant_id,
+                            created_at=created_at,
+                            food_score=food_score,
+                            food_comment=food_comment,
+                            service_score=service_score,
+                            service_comment=service_comment,
+                            price_score=price_score,
+                            price_comment=price_comment)
+        db.session.add(new_review)
+        db.session.commit()
+        flash("Review successfully added")
+
+    # Check if reviewed dish is in dishes table
+    dish_obj = Dish.query.filter(Dish.name == dish_name).first()
+
+    # if dish not in dishes table, add it
+    if not dish_obj:
+        dish_obj = Dish(name=dish_name)
+        db.session.add(dish_obj)
+        db.session.commit()
+
+    # Add new review dish
+    new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
+                                 review_id=new_review.review_id,
+                                 dish_comment=dish_comment)
+    db.session.add(new_review_dish)
+
+    # Check if restaurant and dish are already linked
+    rest_dish_check = RestaurantDish.query.filter_by(
+                                                    dish_id=dish_obj.dish_id,
+                                                    restaurant_id=restaurant_id
+                                                    ).first()
+
+    # if RestaurantDish not in table, add it
+    if not rest_dish_check:
+        new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
+                                       restaurant_id=restaurant_id)
+        db.session.add(new_rest_dish)
+
+    db.session.commit()
+
+    return redirect('/{}'.format(restaurant_id))
 
 
-    return redirect("/")
+@app.route("/user-search")
+def search_users():
+    """Search for users given name and/or email inputs"""
+
+    search_term = "%" + request.args.get("search-name") + "%"
+
+    returned_users = User.query.filter(func.concat(User.fname, ' ', User.lname
+                                                    ).like(search_term)).all()
+    user_results = calculate_user_review_count(returned_users)
+
+    return render_template("user_search_results.html",
+                            results=user_results)
+
+
+def calculate_user_review_count(user_list):
+    """Calculate number of reviews for each given user"""
+
+    # for each user object, add attribute for number of reviews
+    for user in user_list:
+        review_count = len(user.reviews)
+        user.count_reviews = review_count
+
+    return user_list
+
+
+@app.route("/user/<user_id>")
+def display_user_details(user_id):
+    """Display details of a user profile"""
+
+    user = User.query.filter_by(user_id=user_id).first()
+
+    return render_template("user_details.html", user=user)
 
 
 if __name__ == "__main__":

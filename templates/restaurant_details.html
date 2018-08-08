@@ -4,48 +4,54 @@
 <h2>{{ restaurant['name'] }}</h2>
 
 {% for review in restaurant.reviews %}
-    Name: {{ review.user.fname }} {{ review.user.lname }} <br>
-    Food score: {{ review.food_score }} <br>
-    Service score: {{ review.price_score }} <br>
-    Price score: {{ price.food_score }} <br>
+    <div>
+        Name: {{ review.user.fname }} {{ review.user.lname }} <br>
+        Food score: {{ review.food_score }} <br>
+        Service score: {{ review.service_score }} <br>
+        Price score: {{ review.price_score }} <br>
+    </div>
 {% endfor %}
 
 {% if session.get("user_id") %}
     <h4>Add a rating:</h4>
     <form action="/add-review" method="POST">
         Food score: 
-        <select name="food-score">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
+            <select name="food-score" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
         <br>
         Comment:<br>
-        <textarea rows="4" cols="50" name="food-comment"></textarea><br>
+            <textarea rows="4" cols="50" name="food-comment"></textarea><br>
+        Dish name:
+            <input type="text" name="dish-name"><br>
+        Comment:<br>
+            <textarea rows="4" cols="50" name="dish-comment"></textarea><br>
         Service score:
-        <select name="food-score">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
+            <select name="service-score" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
         <br>
         Comment:<br>
-        <textarea rows="4" cols="50" name="service-comment"></textarea><br>
+            <textarea rows="4" cols="50" name="service-comment"></textarea><br>
         Price score:
-        <select name="food-score">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
+            <select name="price-score" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
         <br>
         Comment:<br>
-        <textarea rows="4" cols="50" name="price-comment"></textarea>
+            <textarea rows="4" cols="50" name="price-comment"></textarea>
         <input type="hidden" name="restaurant" value={{ restaurant.restaurant_id }}>
         <br><br>
         <input type="submit" value="Add review">

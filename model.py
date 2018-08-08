@@ -39,6 +39,7 @@ class Restaurant(db.Model):
     name = db.Column(db.String(200), nullable=True)
     phone_number = db.Column(db.String(20), nullable=True)
     address = db.Column(db.String(200), nullable=True)
+    website = db.Column(db.String(200), nullable=True)
     lat = db.Column(db.Numeric, nullable=True)
     lon = db.Column(db.Numeric, nullable=True)
 
