@@ -1,61 +1,59 @@
+<head>
+    <style>
+      #map {
+        height: 50%;
+      }
+    </style>
+</head>
+
 {% extends 'base.html' %}
 {% block content %}
 
 <h2>{{ restaurant['name'] }}</h2>
+{{ restaurant.address }}
+<div id="map"></div>
+
+<h3>Reviews</h3>
+
+{% if session.get("user_id") %}
+    <form action="/review-form">
+        <input type="submit" value="Add a rating">
+    </form>
+{% endif %}
 
 {% for review in restaurant.reviews %}
-    <div>
-        Name: {{ review.user.fname }} {{ review.user.lname }} <br>
+    <p>
+        Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br>
         Food score: {{ review.food_score }} <br>
         Service score: {{ review.service_score }} <br>
         Price score: {{ review.price_score }} <br>
-    </div>
+    </p>
 {% endfor %}
+    
 
-{% if session.get("user_id") %}
-    <h4>Add a rating:</h4>
-    <form action="/add-review" method="POST">
-        Food score: 
-            <select name="food-score" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        <br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="food-comment"></textarea><br>
-        Dish name:
-            <input type="text" name="dish-name"><br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="dish-comment"></textarea><br>
-        Service score:
-            <select name="service-score" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        <br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="service-comment"></textarea><br>
-        Price score:
-            <select name="price-score" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        <br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="price-comment"></textarea>
-        <input type="hidden" name="restaurant" value={{ restaurant.restaurant_id }}>
-        <br><br>
-        <input type="submit" value="Add review">
-    </form>
-{% endif %}
+<script>
+    var map;
+    function initMap() {
+
+        var myLatlng = new google.maps.LatLng('{{ restaurant.lat }}', '{{ restaurant.lon }}');
+        
+        var mapOptions = {
+          zoom: 15,
+          center: myLatlng
+        }
+
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+        var marker = new google.maps.Marker({
+            position: myLatlng,
+            title:"Hello World!"
+        });
+        marker.setMap(map);
+    }
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOGl1WE_Pbd4Xy8Ox6UQh-HcOwP-Pb4ZE&callback=initMap"
+    async defer>
+</script>
 
 {% endblock %}

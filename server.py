@@ -111,8 +111,8 @@ def display_restaurant_results():
     """Call Google API with given search terms and return restaurants"""
 
     # Get submitted search terms
-    term = request.args.get('search-term')
-    location = request.args.get('location')
+    term = request.args.get('search-restaurant')
+    location = request.args.get('restaurant-location')
 
     # Call helper function to make Google Places API call
     response = restaurant_api_call(term, location)
@@ -133,7 +133,7 @@ def restaurant_api_call(term, location):
 
     payload = {'query': search_term + "+in+" + search_location,
                 'type': 'restaurant',
-                'key': os.environ['PLACE_API_KEY']}
+                'key': os.environ['GOOGLE_API_KEY']}
     url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
     r = requests.get(url, params=payload)
@@ -143,14 +143,28 @@ def restaurant_api_call(term, location):
 
 def calculate_rest_review_count(results):
     """Given json response, calculate number of reviews
-    for each return restaurant"""
+    for each restaurant"""
 
-    for index, result in enumerate(results):
-        place_id = result['place_id']
+    for index, restaurant in enumerate(results):
+        place_id = restaurant['place_id']
         review_count = Review.query.filter_by(restaurant_id=place_id).count()
         results[index]['count_reviews'] = review_count
 
     return results
+
+
+# def calculate_rest_rating(results):
+#     """Given list of restaurants, calculate rating for each restaurant"""
+
+#     for index, restaurant in enumerate(results):
+#         place_id = restaurant['place_id']
+#         # for review in restaurant.reviews:
+#         review_count = Restaurant.query.with_entities(
+#                        Review.food_score).filter_by(restaurant_id=place_id
+#                        ).all()
+#         results[index]['count_reviews'] = review_count
+
+#     return results
 
 @app.route('/<place_id>')
 def display_restaurant(place_id):
@@ -167,7 +181,7 @@ def display_restaurant(place_id):
         fields = 'name,formatted_phone_number,formatted_address,geometry,website'
         payload = {'place_id': place_id,
                     'fields': fields,
-                    'key': os.environ['PLACE_API_KEY']}
+                    'key': os.environ['GOOGLE_API_KEY']}
         url = 'https://maps.googleapis.com/maps/api/place/details/json?'
 
         r = requests.get(url, params=payload)
@@ -177,7 +191,7 @@ def display_restaurant(place_id):
 
         # Details to create Restaurant object
         name = result['name']
-        phone_number = result['formatted_phone_number']
+        phone_number = result.get('formatted_phone_number')
         address = result['formatted_address']
         website = result['website']
         lat = result['geometry']['location']['lat']
@@ -199,6 +213,13 @@ def display_restaurant(place_id):
                                 restaurant=new_restaurant)
 
 
+@app.route("/review-form")
+def render_review_creation_page():
+    """Take user to page to create review"""
+
+    return render_template("add_review.html")
+
+
 @app.route("/add-review", methods=["POST"])
 def add_review():
     """Add user's review to database"""
@@ -206,7 +227,7 @@ def add_review():
     # Get review inputs
     user_id = session.get("user_id")
     restaurant_id = request.form.get("restaurant")
-    created_at = datetime.now()
+    # created_at = datetime.now()
     food_score = request.form.get("food-score")
     food_comment = request.form.get("food-comment")
     service_score = request.form.get("service-score")
@@ -227,7 +248,7 @@ def add_review():
     else:
         new_review = Review(user_id=user_id,
                             restaurant_id=restaurant_id,
-                            created_at=created_at,
+                            # created_at=created_at,
                             food_score=food_score,
                             food_comment=food_comment,
                             service_score=service_score,
@@ -277,7 +298,7 @@ def search_users():
     search_term = "%" + request.args.get("search-name") + "%"
 
     returned_users = User.query.filter(func.concat(User.fname, ' ', User.lname
-                                                    ).like(search_term)).all()
+                                                    ).ilike(search_term)).all()
     user_results = calculate_user_review_count(returned_users)
 
     return render_template("user_search_results.html",
@@ -302,6 +323,19 @@ def display_user_details(user_id):
     user = User.query.filter_by(user_id=user_id).first()
 
     return render_template("user_details.html", user=user)
+
+@app.route("/dish-search")
+def search_dishes():
+    """Search for reviewed dishes near given location"""
+
+    search_term = "%" + request.args.get("search-dish") + "%"
+    location = request.args.get("dish-location")
+
+    matching_dishes = Dish.query.filter_by(name.ilike(search_term)).all()
+
+    return render_template("matching_dishes.html",
+                            dishes=matching_dishes,
+                            location=location)
 
 
 if __name__ == "__main__":

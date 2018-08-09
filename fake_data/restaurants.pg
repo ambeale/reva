@@ -1,0 +1,38 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.5.13
+-- Dumped by pg_dump version 9.5.13
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Data for Name: restaurants; Type: TABLE DATA; Schema: public; Owner: vagrant
+--
+
+COPY public.restaurants (restaurant_id, name, phone_number, address, website, lat, lon) FROM stdin;
+ChIJNZloNTd-j4ARxGMOXZp7KfI	Farmhouse Kitchen Thai Cuisine	(415) 814-2920	710 Florida St, San Francisco, CA 94110, USA	http://www.farmhousesf.com/	37.7602175	-122.4112856
+ChIJfcaly4eAhYARSIvvfFpH64w	Tropisueño	(415) 243-0299	75 Yerba Buena Ln, San Francisco, CA 94103, USA	http://www.tropisueno.com/	37.7853583	-122.40405
+ChIJlfC_eYKAhYARhcWC559q0jc	Basil	(415) 552-8999	1175 Folsom St, San Francisco, CA 94103, USA	http://www.basilthai.com/	37.7753954	-122.4092871
+ChIJVRnYLHyAhYARhl2ZVJFi5iU	Osha Thai Restaurant and Lounge	(415) 896-6742	311 3rd St, San Francisco, CA 94107, USA	http://www.oshathai.com/third-street	37.783654	-122.398461
+ChIJ5UiqQJCAhYAR5L5rAgjuf_0	Tadu Ethiopian Kitchen	(415) 409-6649	484 Ellis St, San Francisco, CA 94102, USA	http://taduethiopiankitchen.com/	37.7847934	-122.4141884
+ChIJKT_dq7GAhYARpHV3vs0HUWQ	Oasis Cafe	(415) 474-4900	901 Divisadero St, San Francisco, CA 94115, USA	http://www.oasiscafesf.com/	37.77787800000001	-122.4385472
+ChIJMygdeCZ-j4ARKDtpQiICwUo	Pink Onion	(415) 529-2635	64 14th St, San Francisco, CA 94103, USA	https://www.pinkonionmenu.com/	37.76876980000001	-122.4148819
+ChIJzf0lTbCAhYARqz-tqaIyJaY	Little Star Pizza	(415) 441-1118	846 Divisadero St, San Francisco, CA 94117, USA	http://www.littlestarpizza.com/divisadero	37.77753630000001	-122.43809
+ChIJh_24QJ-AhYAR_xbUNVN2Xns	Rich Table	(415) 355-9085	199 Gough St, San Francisco, CA 94102, USA	http://richtablesf.com/	37.7748683	-122.422826
+ChIJk8dm4J6AhYAR8MCM6inxTgE	RT Rotisserie	\N	101 Oak St, San Francisco, CA 94102, USA	http://rtrotisserie.com/	37.7750997	-122.4210907
+\.
+
+
+--
+-- PostgreSQL database dump complete
+--
+

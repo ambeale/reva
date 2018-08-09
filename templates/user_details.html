@@ -4,15 +4,14 @@
 <h2>{{ user.fname }} {{ user.lname }}</h2>
 
 {% for review in user.reviews %}
-    <div>
+    <p>
         Restaurant:
         <a href="/{{ review.restaurant_id }}">
-            {{ review.restaurant.name }}
-        </a> <br>
+            {{ review.restaurant.name }}</a><br>
         Food score: {{ review.food_score }} <br>
         Service score: {{ review.service_score }} <br>
         Price score: {{ review.price_score }} <br>
-    </div>
+    </p>
 {% endfor %}
 
 {% endblock %}

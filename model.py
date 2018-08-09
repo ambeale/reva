@@ -1,6 +1,7 @@
 """Models and database functions for Hackbright Food Review project."""
 
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -17,12 +18,16 @@ class User(db.Model):
 
     __tablename__ = "users"
 
+    default_icon = """https://images.unsplash.com/photo-1491273289208-
+                      9340cb42e5d9?crop=entropy&fm=jpg&w=150&h=150&fit=crop"""
+
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     email = db.Column(db.String(64), nullable=False)
     fname = db.Column(db.String(64), nullable=False)
     lname = db.Column(db.String(64), nullable=False)
     password = db.Column(db.String(64), nullable=False)
     zipcode = db.Column(db.String(15), nullable=True)
+    icon = db.Column(db.String(300), nullable=False, default=default_icon)
 
     def __repr__(self):
         """Provide helpful representation when printed"""
@@ -50,6 +55,30 @@ class Restaurant(db.Model):
                                                       self.name)
 
 
+class Favorite(db.Model):
+    """Favorite restaurants of users"""
+
+    __tablename__ = "favorites"
+
+    favorite_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    restaurant_id = db.Column(db.String(200), db.ForeignKey(
+                                                'restaurants.restaurant_id'))
+
+    # Relationships
+    restaurant = db.relationship("Restaurant", backref=db.backref("favorites"))
+    user = db.relationship("User", backref=db.backref("favorites"))
+
+    
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        return """<Favorite id={} user_id={}
+                    restaurant_id={}>""".format(self.favorite_id, 
+                                                self.user_id,
+                                                self.restaurant_id)
+
+
 class Review(db.Model):
     """Review on website."""
 
@@ -59,7 +88,7 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     restaurant_id = db.Column(db.String(200), db.ForeignKey(
                                                 'restaurants.restaurant_id'))
-    created_at = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     food_score = db.Column(db.Integer, nullable=False)
     food_comment = db.Column(db.Text, nullable=True)
     service_score = db.Column(db.Integer, nullable=False)
