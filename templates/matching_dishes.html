@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Dishes found matching "{{ search_dish }}":</h2>
+
+{% for dish in dishes %}
+<p>
+    {{ dish.name }}
+</p>
+{% endfor %}
+
+
+{% endblock %}

@@ -325,8 +325,8 @@ def add_review():
     # Check if reviewed dish is in dishes table
     dish_obj = Dish.query.filter(Dish.name == dish_name).first()
 
-    # if dish not in dishes table, add it
-    if not dish_obj:
+    # if dish not in dishes table and dish name not none, add it
+    if not dish_obj and dish_name:
         dish_obj = Dish(name=dish_name)
         db.session.add(dish_obj)
         db.session.commit()
@@ -391,14 +391,16 @@ def display_user_details(user_id):
 def search_dishes():
     """Search for reviewed dishes near given location"""
 
-    search_term = "%" + request.args.get("search-dish") + "%"
+    search_dish = request.args.get("search-dish")
     location = request.args.get("dish-location")
 
-    matching_dishes = Dish.query.filter_by(name.ilike(search_term)).all()
+    search_term = "%" + search_dish + "%"
+    matching_dishes = Dish.query.filter(Dish.name.ilike(search_term)).all()
 
     return render_template("matching_dishes.html",
                             dishes=matching_dishes,
-                            location=location)
+                            location=location,
+                            search_dish=search_dish)
 
 
 if __name__ == "__main__":
