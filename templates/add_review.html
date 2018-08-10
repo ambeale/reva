@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h4>Add a rating:</h4>
+<h3>Add a rating for {{ name }}:</h3>
     <form action="/add-review" method="POST">
-        Food score: 
+        <h4>Food</h4>
+            Score:
             <select name="food-score" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -12,13 +13,12 @@
                 <option value="5">5</option>
             </select>
         <br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="food-comment"></textarea><br>
         Dish name:
             <input type="text" name="dish-name"><br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="dish-comment"></textarea><br>
-        Service score:
+        Review:<br>
+            <textarea rows="4" cols="50" name="food-comment"></textarea><br>
+        <h4>Service:</h4>
+            Score:
             <select name="service-score" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -29,7 +29,8 @@
         <br>
         Comment:<br>
             <textarea rows="4" cols="50" name="service-comment"></textarea><br>
-        Price score:
+        <h4>Price</h4>
+            Score:
             <select name="price-score" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -40,7 +41,7 @@
         <br>
         Comment:<br>
             <textarea rows="4" cols="50" name="price-comment"></textarea>
-        <input type="hidden" name="restaurant" value={{ restaurant.restaurant_id }}>
+        <input type="hidden" name="restaurant" value={{ restaurant_id }}>
         <br><br>
         <input type="submit" value="Add review">
     </form>

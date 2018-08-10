@@ -9,14 +9,21 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>{{ restaurant['name'] }}</h2>
-{{ restaurant.address }}
+<h2>{{ restaurant.name }}</h2>
+<p>
+    Address: {{ restaurant.address }}<br>
+    Reviews: {{ restaurant.count_reviews }}<br>
+    Overall rating: {{ restaurant.reva_rating }}
+</p>
+
 <div id="map"></div>
 
 <h3>Reviews</h3>
 
 {% if session.get("user_id") %}
     <form action="/review-form">
+        <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
+        <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
         <input type="submit" value="Add a rating">
     </form>
 {% endif %}
@@ -52,7 +59,7 @@
     }
 
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOGl1WE_Pbd4Xy8Ox6UQh-HcOwP-Pb4ZE&callback=initMap"
+<script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
     async defer>
 </script>
 

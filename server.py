@@ -116,16 +116,17 @@ def display_restaurant_results():
 
     # Call helper function to make Google Places API call
     response = restaurant_api_call(term, location)
-    results = response['results']
-    results_with_count = calculate_rest_review_count(results)
+    results = add_rest_review_count_json(response)
+    full_results = add_rest_ratings_json(results)
 
     # Render template with search results
     return render_template("restaurant_search_results.html",
-                             results=results_with_count)
+                             results=full_results)
 
 
 def restaurant_api_call(term, location):
-    """Call Google Places Text Search API using given search terms"""
+    """Call Google Places Text Search API using given search terms
+    and return results"""
 
     search_term = term.replace(" ", "+")
     search_location = location.replace(",","").replace(" ", "+")
@@ -136,13 +137,14 @@ def restaurant_api_call(term, location):
                 'key': os.environ['GOOGLE_API_KEY']}
     url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
-    r = requests.get(url, params=payload)
+    r = requests.get(url, params=payload).json()
+    results = r['results']
 
-    return r.json()
+    return results
 
 
-def calculate_rest_review_count(results):
-    """Given json response, calculate number of reviews
+def add_rest_review_count_json(results):
+    """Given Google API json response, calculate and add number of reviews
     for each restaurant"""
 
     for index, restaurant in enumerate(results):
@@ -153,28 +155,75 @@ def calculate_rest_review_count(results):
     return results
 
 
-# def calculate_rest_rating(results):
-#     """Given list of restaurants, calculate rating for each restaurant"""
+def add_rest_ratings_json(results):
+    """Given Google API json response, calculate and add rating
+    for each restaurant"""
 
-#     for index, restaurant in enumerate(results):
-#         place_id = restaurant['place_id']
-#         # for review in restaurant.reviews:
-#         review_count = Restaurant.query.with_entities(
-#                        Review.food_score).filter_by(restaurant_id=place_id
-#                        ).all()
-#         results[index]['count_reviews'] = review_count
+    for index, result in enumerate(results):
+        # If restaurant object has no reviews, set value as N/A
+        if result.get('count_reviews') == 0:
+            results[index]['reva_rating'] = "N/A"
+        
+        # Else do query to get ratings
+        else:
+            place_id = result['place_id']
 
-#     return results
+            restaurant = Restaurant.query.filter_by(restaurant_id=place_id
+                                                       ).first()
+            review_scores = restaurant.reviews
+
+            # Only calculate if query returns reviews
+            if review_scores:
+                restaurant_rating = calculate_overall_rating(review_scores)
+                results[index]['reva_rating'] = restaurant_rating
+
+    return results
+
+def calculate_overall_rating(reviews):
+    """Given list of Review objects, calculate and return overall rating
+
+    >>> test = Restaurant(restaurant_id="test")
+    >>> test.ratings = [Review(food_score=4, service_score=5, price_score=5),
+    ...                 Review(food_score=3, service_score=4, price_score=5),
+    ...                 Review(food_score=2, service_score=3, price_score=5)]
+    >>> calculate_overall_rating(test.ratings)
+    3.65
+
+    """
+
+    food_sum = 0.0
+    service_sum = 0.0
+    price_sum = 0.0
+    num_reviews = len(reviews)
+
+    for r in reviews: # (food, service, price)
+        food_sum += r.food_score
+        service_sum += r.service_score
+        price_sum += r.price_score
+
+    food_avg = food_sum / num_reviews
+    service_avg = service_sum / num_reviews
+    price_avg = price_sum / num_reviews
+
+    # Calculate overall average using proprietary algorithm
+    overall_avg = round((food_avg * 0.5) + (service_avg * 0.35)
+                                         + (price_avg * 0.15), 2)
+
+    return overall_avg
 
 @app.route('/<place_id>')
 def display_restaurant(place_id):
-    """ADD DOCSTRING"""
+    """display resturant details and reviews"""
 
-    query = Restaurant.query.filter_by(restaurant_id=place_id).first()
+    restaurant = Restaurant.query.filter_by(restaurant_id=place_id).first()
 
     # If restaurant in database, query and pass to template
-    if query:
-        return render_template("restaurant_details.html", restaurant=query)
+    if restaurant:
+        restaurant.count_reviews = len(restaurant.reviews)
+        restaurant.reva_rating = calculate_overall_rating(restaurant.reviews)
+        return render_template("restaurant_details.html",
+                                restaurant=restaurant,
+                                api_key=os.environ['GOOGLE_API_KEY'])
 
     # If restaurant not in database, trigger Place API request
     else:
@@ -209,15 +258,23 @@ def display_restaurant(place_id):
         db.session.add(new_restaurant)
         db.session.commit()
 
+        new_restaurant['count_reviews'] = "N/A"
+
         return render_template("restaurant_details.html",
-                                restaurant=new_restaurant)
+                                restaurant=new_restaurant,
+                                api_key=os.environ['GOOGLE_API_KEY'])
 
 
 @app.route("/review-form")
 def render_review_creation_page():
     """Take user to page to create review"""
 
-    return render_template("add_review.html")
+    name = request.args.get("restaurant-name")
+    rest_id = request.args.get("restaurant-id")
+
+    return render_template("add_review.html",
+                            name=name,
+                            restaurant_id=rest_id)
 
 
 @app.route("/add-review", methods=["POST"])
@@ -236,15 +293,21 @@ def add_review():
     price_comment = request.form.get("price-comment")
     
     # Get dish inputs
-    if request.form.get("dish-name"):
-        dish_name = request.form.get("dish-name").capitalize()
+    dish_name = request.form.get("dish-name")
+    if dish_name:
+            dish_name = dish_name.capitalize()
     dish_comment = request.form.get("dish-comment")
 
     # Check if user has already reviewed restaurant
     user_review_check = Review.query.filter_by(user_id=user_id,
                                                restaurant_id=restaurant_id)
+    
+    # If user has reviewed, send back to restaurant page
     if user_review_check.first():
-        flash("You've already review this restaurant")
+        flash("You've already reviewed this restaurant")
+        return redirect('/{}'.format(restaurant_id))
+    
+    # Else create new review
     else:
         new_review = Review(user_id=user_id,
                             restaurant_id=restaurant_id,
@@ -268,17 +331,17 @@ def add_review():
         db.session.add(dish_obj)
         db.session.commit()
 
-    # Add new review dish
+    # Deal with middle table - add new review dish
     new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
                                  review_id=new_review.review_id,
                                  dish_comment=dish_comment)
     db.session.add(new_review_dish)
 
+    # Deal with association table - 
     # Check if restaurant and dish are already linked
-    rest_dish_check = RestaurantDish.query.filter_by(
-                                                    dish_id=dish_obj.dish_id,
-                                                    restaurant_id=restaurant_id
-                                                    ).first()
+    rest_dish_check = RestaurantDish.query.filter_by(dish_id=dish_obj.dish_id,
+                                                     restaurant_id=restaurant_id
+                                                     ).first()
 
     # if RestaurantDish not in table, add it
     if not rest_dish_check:
