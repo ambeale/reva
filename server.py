@@ -24,6 +24,7 @@ app.secret_key = "betterthanyelp"
 app.jinja_env.undefined = StrictUndefined
 
 
+### HOMEPAGE ROUTE ###
 @app.route('/')
 def index():
     """Homepage."""
@@ -31,6 +32,7 @@ def index():
     return render_template("homepage.html")
 
 
+### LOG IN / OUT ROUTES
 @app.route('/login-form')
 def display_login_page():
     """Display login page"""
@@ -94,17 +96,17 @@ def create_new_user():
     if email_match:
         flash('You already exist.')
     else:
-        new_user = User(email=new_email,
-                        fname=fname,
-                        lname=lname,
-                        password=password,
-                        zipcode=zipcode)
+        new_user = User(email=new_email, fname=fname, lname=lname,
+                        password=password, zipcode=zipcode)
         db.session.add(new_user)
         db.session.commit()
 
         flash("You've been added!")
 
     return redirect('/login-form')
+
+
+### RESTAURANT ROUTES ###
 
 @app.route('/restaurant-search')
 def display_restaurant_results():
@@ -123,93 +125,6 @@ def display_restaurant_results():
     return render_template("restaurant_search_results.html",
                              results=full_results)
 
-
-def restaurant_api_call(term, location):
-    """Call Google Places Text Search API using given search terms
-    and return results"""
-
-    search_term = term.replace(" ", "+")
-    search_location = location.replace(",","").replace(" ", "+")
-    # query = search_term + "+in+" + search_location
-
-    payload = {'query': search_term + "+in+" + search_location,
-                'type': 'restaurant',
-                'key': os.environ['GOOGLE_API_KEY']}
-    url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
-
-    r = requests.get(url, params=payload).json()
-    results = r['results']
-
-    return results
-
-
-def add_rest_review_count_json(results):
-    """Given Google API json response, calculate and add number of reviews
-    for each restaurant"""
-
-    for index, restaurant in enumerate(results):
-        place_id = restaurant['place_id']
-        review_count = Review.query.filter_by(restaurant_id=place_id).count()
-        results[index]['count_reviews'] = review_count
-
-    return results
-
-
-def add_rest_ratings_json(results):
-    """Given Google API json response, calculate and add rating
-    for each restaurant"""
-
-    for index, result in enumerate(results):
-        # If restaurant object has no reviews, set value as N/A
-        if result.get('count_reviews') == 0:
-            results[index]['reva_rating'] = "N/A"
-        
-        # Else do query to get ratings
-        else:
-            place_id = result['place_id']
-
-            restaurant = Restaurant.query.filter_by(restaurant_id=place_id
-                                                       ).first()
-            review_scores = restaurant.reviews
-
-            # Only calculate if query returns reviews
-            if review_scores:
-                restaurant_rating = calculate_overall_rating(review_scores)
-                results[index]['reva_rating'] = restaurant_rating
-
-    return results
-
-def calculate_overall_rating(reviews):
-    """Given list of Review objects, calculate and return overall rating
-
-    >>> test = Restaurant(restaurant_id="test")
-    >>> test.ratings = [Review(food_score=4, service_score=5, price_score=5),
-    ...                 Review(food_score=3, service_score=4, price_score=5),
-    ...                 Review(food_score=2, service_score=3, price_score=5)]
-    >>> calculate_overall_rating(test.ratings)
-    3.65
-
-    """
-
-    food_sum = 0.0
-    service_sum = 0.0
-    price_sum = 0.0
-    num_reviews = len(reviews)
-
-    for r in reviews: # (food, service, price)
-        food_sum += r.food_score
-        service_sum += r.service_score
-        price_sum += r.price_score
-
-    food_avg = food_sum / num_reviews
-    service_avg = service_sum / num_reviews
-    price_avg = price_sum / num_reviews
-
-    # Calculate overall average using proprietary algorithm
-    overall_avg = round((food_avg * 0.5) + (service_avg * 0.35)
-                                         + (price_avg * 0.15), 2)
-
-    return overall_avg
 
 @app.route('/<place_id>')
 def display_restaurant(place_id):
@@ -258,7 +173,8 @@ def display_restaurant(place_id):
         db.session.add(new_restaurant)
         db.session.commit()
 
-        new_restaurant['count_reviews'] = "N/A"
+        new_restaurant.count_reviews = "N/A"
+        new_restaurant.reva_rating = "N/A"
 
         return render_template("restaurant_details.html",
                                 restaurant=new_restaurant,
@@ -270,11 +186,31 @@ def render_review_creation_page():
     """Take user to page to create review"""
 
     name = request.args.get("restaurant-name")
-    rest_id = request.args.get("restaurant-id")
+    restaurant = request.args.get("restaurant-id")
 
     return render_template("add_review.html",
                             name=name,
-                            restaurant_id=rest_id)
+                            restaurant_id=restaurant)
+
+
+@app.route("/restaurant-dish-search")
+def render_restaurant_dish_search():
+    """Search for dishes matching restaurant and dish"""
+
+    dish = request.args.get("dish-search")
+    search_input = "%" + dish + "%"
+    restaurant = request.args.get("restaurant-id")
+
+    
+    query = db.session.query(Dish).join(RestaurantDish)
+    matching_dishes = query.filter(RestaurantDish.restaurant_id==restaurant,
+                                    Dish.name.ilike(search_input)).all()
+
+    print(matching_dishes)
+
+    return render_template("restaurant_dish_search_results.html",
+                            dishes=matching_dishes,
+                            search_dish=dish, restaurant_id=restaurant)
 
 
 @app.route("/add-review", methods=["POST"])
@@ -284,7 +220,6 @@ def add_review():
     # Get review inputs
     user_id = session.get("user_id")
     restaurant_id = request.form.get("restaurant")
-    # created_at = datetime.now()
     food_score = request.form.get("food-score")
     food_comment = request.form.get("food-comment")
     service_score = request.form.get("service-score")
@@ -295,7 +230,8 @@ def add_review():
     # Get dish inputs
     dish_name = request.form.get("dish-name")
     if dish_name:
-            dish_name = dish_name.capitalize()
+        # capitalize for style consistency in DB
+        dish_name = dish_name.capitalize()
     dish_comment = request.form.get("dish-comment")
 
     # Check if user has already reviewed restaurant
@@ -311,7 +247,6 @@ def add_review():
     else:
         new_review = Review(user_id=user_id,
                             restaurant_id=restaurant_id,
-                            # created_at=created_at,
                             food_score=food_score,
                             food_comment=food_comment,
                             service_score=service_score,
@@ -342,7 +277,6 @@ def add_review():
     rest_dish_check = RestaurantDish.query.filter_by(dish_id=dish_obj.dish_id,
                                                      restaurant_id=restaurant_id
                                                      ).first()
-
     # if RestaurantDish not in table, add it
     if not rest_dish_check:
         new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
@@ -353,6 +287,7 @@ def add_review():
 
     return redirect('/{}'.format(restaurant_id))
 
+######### USER SEARCH ROUTES ###########
 
 @app.route("/user-search")
 def search_users():
@@ -364,19 +299,7 @@ def search_users():
                                                     ).ilike(search_term)).all()
     user_results = calculate_user_review_count(returned_users)
 
-    return render_template("user_search_results.html",
-                            results=user_results)
-
-
-def calculate_user_review_count(user_list):
-    """Calculate number of reviews for each given user"""
-
-    # for each user object, add attribute for number of reviews
-    for user in user_list:
-        review_count = len(user.reviews)
-        user.count_reviews = review_count
-
-    return user_list
+    return render_template("user_search_results.html", results=user_results)
 
 
 @app.route("/user/<user_id>")
@@ -386,6 +309,9 @@ def display_user_details(user_id):
     user = User.query.filter_by(user_id=user_id).first()
 
     return render_template("user_details.html", user=user)
+
+
+######### DISH ROUTES ##########
 
 @app.route("/dish-search")
 def search_dishes():
@@ -397,10 +323,179 @@ def search_dishes():
     search_term = "%" + search_dish + "%"
     matching_dishes = Dish.query.filter(Dish.name.ilike(search_term)).all()
 
-    return render_template("matching_dishes.html",
-                            dishes=matching_dishes,
-                            location=location,
-                            search_dish=search_dish)
+    return render_template("matching_dishes.html", dishes=matching_dishes,
+                            location=location, search_dish=search_dish)
+
+
+@app.route("/dish-details/<dish_id>/<location>")
+def deplay_dish_details(dish_id, location):
+    """Display details of chosen dish"""
+
+    query = Dish.query.filter_by(dish_id=dish_id).options(
+                                            db.joinedload('restaurant_dishes')
+                                            ).first()
+
+    rest_dishes = query.restaurant_dishes
+    restaurants = set()
+
+    for rest_dish in rest_dishes:
+        restaurant = rest_dish.restaurant
+        food_avg, service_avg, price_avg = calculate_individual_ratings(
+                                                            restaurant.reviews)
+        restaurant.food_avg = food_avg
+        restaurants.add(restaurant)
+
+
+    return render_template("dish_details.html", dish=query, results=restaurants)
+
+
+@app.route("/dish-reviews/<dish_id>/<restaurant_id>")
+def display_dish_reviews_from_restaurant(dish_id, restaurant_id):
+    """Display reviews associated with a given dish and restaurant"""
+
+    # sql = """SELECT rev.*
+    #             FROM review_dishes rd
+    #             LEFT JOIN reviews rev
+    #                 USING (review_id)
+    #             WHERE rev.restaurant_id = :rest_id
+    #                 AND rd.dish_id = :dish
+    #         """
+    # cursor = db.session.execute(sql,
+    #                             {'rest_id': restaurant_id, 'dish': dish_id})
+    # reviews = cursor.fetchall()
+
+
+    query = db.session.query(Review).join(ReviewDish)
+    reviews = query.filter(Review.restaurant_id==restaurant_id,
+                            ReviewDish.dish_id==dish_id).all()
+
+    dish = Dish.query.filter_by(dish_id=dish_id).first()
+    restaurant = Restaurant.query.filter_by(restaurant_id=restaurant_id).first()
+
+
+    return render_template("rest_dish_reviews.html",
+                            reviews=reviews,
+                            dish=dish,
+                            restaurant=restaurant)
+
+
+####### HELPER FUNCTIONS #######
+
+def restaurant_api_call(term, location):
+    """Call Google Places Text Search API using given search terms
+    and return results"""
+
+    search_term = term.replace(" ", "+")
+    search_location = location.replace(",","").replace(" ", "+")
+    # query = search_term + "+in+" + search_location
+
+    payload = {'query': search_term + "+in+" + search_location,
+                'type': 'restaurant',
+                'key': os.environ['GOOGLE_API_KEY']}
+    url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
+
+    r = requests.get(url, params=payload).json()
+    results = r['results']
+
+    return results
+
+
+def add_rest_review_count_json(results):
+    """Given Google API json response (list of dicts), calculate and add
+    number of reviews for each restaurant"""
+
+    for index, restaurant in enumerate(results):
+        place_id = restaurant['place_id']
+        review_count = Review.query.filter_by(restaurant_id=place_id).count()
+        results[index]['count_reviews'] = review_count
+
+    return results
+
+
+def add_rest_ratings_json(results):
+    """Given Google API json response (list of dicts), calculate and add rating
+    for each restaurant"""
+
+    for index, result in enumerate(results):
+        # If restaurant object has no reviews, set value as N/A
+        if result.get('count_reviews') == 0:
+            results[index]['reva_rating'] = "N/A"
+        
+        # Else do query to get ratings
+        else:
+            place_id = result['place_id']
+            restaurant = Restaurant.query.filter_by(restaurant_id=place_id
+                                                       ).first()
+            review_scores = restaurant.reviews
+
+            # Only calculate if query returns reviews
+            if review_scores:
+                restaurant_rating = calculate_overall_rating(review_scores)
+                results[index]['reva_rating'] = restaurant_rating
+
+    return results
+
+
+def calculate_overall_rating(reviews):
+    """Given list of Review objects, use algorithm to return overall rating
+
+    >>> test = Restaurant(restaurant_id="test")
+    >>> test.ratings = [Review(food_score=4, service_score=5, price_score=5),
+    ...                 Review(food_score=3, service_score=4, price_score=5),
+    ...                 Review(food_score=2, service_score=3, price_score=5)]
+    >>> calculate_overall_rating(test.ratings)
+    3.65
+
+    """
+
+    if len(reviews) == 0:
+        return 0.0;
+
+
+    # Get score averages
+    food_avg, service_avg, price_avg = calculate_individual_ratings(reviews)    
+
+    # Calculate overall average using proprietary algorithm
+    overall_avg = round((food_avg * 0.5) + (service_avg * 0.35)
+                                         + (price_avg * 0.15), 2)
+
+    return overall_avg
+
+
+def calculate_individual_ratings(reviews):
+    """Given list of Review objects, calculate and return tuple of score 
+    averages for each category"""
+
+    if len(reviews) == 0:
+        return 0.0;
+
+    food_sum = 0.0
+    service_sum = 0.0
+    price_sum = 0.0
+    num_reviews = len(reviews)
+
+    for r in reviews: # (food, service, price)
+        food_sum += r.food_score
+        service_sum += r.service_score
+        price_sum += r.price_score
+
+    food_avg = food_sum / num_reviews
+    service_avg = service_sum / num_reviews
+    price_avg = price_sum / num_reviews
+
+    return (food_avg, service_avg, price_avg)
+
+
+def calculate_user_review_count(user_list):
+    """Given list of Users, calculate number of reviews and add to 
+    each User object"""
+
+    # for each user object, add attribute for number of reviews
+    for user in user_list:
+        review_count = len(user.reviews)
+        user.count_reviews = review_count
+
+    return user_list
 
 
 if __name__ == "__main__":

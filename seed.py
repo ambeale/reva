@@ -8,8 +8,8 @@ from server import app
 from datetime import datetime
 
 
-# IMPORTANT: Be sure to run psql testdb < fake_data/restaurants.pg 
-#            before seed.py file to seed restaurants
+# IMPORTANT: Be sure to run psql [db_name] < fake_data/restaurants.pg 
+#            before seed.py file to seed with restaurants from Google API
 
 def load_users():
     """Load fake users into database."""
@@ -102,8 +102,10 @@ def load_middle_tables():
             (dish_id,
               dish,
               review_id,
-              dish_comment,
-              restaurant_id) = row.split("|")
+              dish_comment) = row.split("|")
+
+            query = Review.query.filter_by(review_id=review_id).first()
+            restaurant_id = query.restaurant_id
             
             review_dish = ReviewDish(dish_id=dish_id,
                                      review_id=review_id,

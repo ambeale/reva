@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Reviews associated with dish "{{ dish.name }}" at {{ restaurant.name }}:</h2>
+
+{% for review in reviews %}
+    <p>
+        <h4>Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a></h4>
+        Food score: {{ review.food_score }} <br>
+        <ul>
+            <li>{{ review.food_comment }}</li>
+        </ul>
+        Service score: {{ review.service_score }} <br>
+        <ul>
+            <li>{{ review.service_comment }}</li>
+        </ul>
+        Price score: {{ review.price_score }} <br>
+        <ul>
+            <li>{{ review.price_comment }}</li>
+        </ul>
+        Dishes: 
+        <ul>
+        {% for rd in review.review_dishes %}
+            <li>{{ rd.dish.name }}</li>
+        {% endfor %}
+        </ul>
+    </p>
+{% endfor %}
+
+
+
+{% endblock %}

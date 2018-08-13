@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>{{ dish.name }}</h2>
+
+{% for result in results %}
+    <p>
+        Restaurant name: <a href="/{{ result.restaurant_id }}">{{ result.name }}</a>
+        <br>
+        Avg. food rating: {{ result.food_avg }}
+        <br>
+        <form action="/dish-reviews/{{ dish.dish_id }}/{{ result.restaurant_id }}">
+            <input type="submit" value="Reviews containing {{ dish.name }}">
+        </form>
+        
+    </p>
+{% endfor %}
+
+
+{% endblock %}

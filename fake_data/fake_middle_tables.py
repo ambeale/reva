@@ -33,10 +33,8 @@ for i in range(10):
     for j in range(10):
         review_id = random.randint(1,100)
         dish_comment = fake.paragraph()
-        restaurant_id = random.choice(restaurants)
 
-        print("""{}|{}|{}|{}|{}""".format(dish_id,
+        print("""{}|{}|{}|{}""".format(dish_id,
                                           dish,
                                           review_id,
-                                          dish_comment,
-                                          restaurant_id))
+                                          dish_comment))

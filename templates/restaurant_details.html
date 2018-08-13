@@ -28,6 +28,13 @@
     </form>
 {% endif %}
 
+<form action="/restaurant-dish-search">
+    Search for a dish:
+    <input type="text" name="dish-search">
+    <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
+    <input type="submit" value="Search">
+</form>
+
 {% for review in restaurant.reviews %}
     <p>
         Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br>
