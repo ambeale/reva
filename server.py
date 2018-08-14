@@ -3,7 +3,7 @@
 from jinja2 import StrictUndefined
 
 from flask import (Flask, render_template, redirect, request, flash,
-                   session)
+                   session, jsonify)
 from flask_debugtoolbar import DebugToolbarExtension
 
 from datetime import datetime
@@ -40,7 +40,7 @@ def display_login_page():
     return render_template("login.html")
 
 
-@app.route('/login')
+@app.route('/login') # TO DO: add POST
 def user_login():
     """Log user into application"""
 
@@ -64,7 +64,7 @@ def user_login():
         return redirect("/login")
 
 
-@app.route('/logout')
+@app.route('/logout') # TO DO: add POST
 def user_logout():
     """Log user out"""
 

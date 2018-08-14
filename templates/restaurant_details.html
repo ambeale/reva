@@ -16,7 +16,7 @@
     Overall rating: {{ restaurant.reva_rating }}
 </p>
 
-<div id="map"></div>
+<div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
 
 <h3>Reviews</h3>
 
@@ -44,30 +44,10 @@
     </p>
 {% endfor %}
     
-
-<script>
-    var map;
-    function initMap() {
-
-        var myLatlng = new google.maps.LatLng('{{ restaurant.lat }}', '{{ restaurant.lon }}');
-        
-        var mapOptions = {
-          zoom: 15,
-          center: myLatlng
-        }
-
-        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-        var marker = new google.maps.Marker({
-            position: myLatlng,
-            title:"Hello World!"
-        });
-        marker.setMap(map);
-    }
-
-</script>
+<script src="/static/js/restaurant_map.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
     async defer>
 </script>
+
 
 {% endblock %}
