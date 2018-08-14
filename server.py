@@ -106,6 +106,18 @@ def create_new_user():
     return redirect('/login-form')
 
 
+@app.route('/user-profile')
+def display_user_profile_page():
+    """Render user's profile page"""
+
+    user = session.get("user_id")
+    print(user)
+    user_info = User.query.filter_by(user_id=user).first()
+    print(user_info)
+
+    return render_template("user_profile.html", user=user_info)
+
+
 ### RESTAURANT ROUTES ###
 
 @app.route('/restaurant-search')

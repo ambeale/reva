@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>RevA</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
 </head>
 <body>
     <a href="/">Food Reviews</a> |
@@ -11,6 +12,9 @@
     {% else %}
         <a href="/login-form">Log In</a>
     {% endif %} 
+    {% if session.get("user_id") %}
+        | <a href="/user-profile">My Profile</a>
+    {% endif %}
     
 <!--     | <a href="/add-new">Add new user</a> -->
     <hr>
