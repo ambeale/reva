@@ -490,40 +490,48 @@ def add_dishes_to_db():
         db.session.commit()
         flash("Review successfully added")
 
-    # If not dishes, finished => redirect to restuarant page
+    # If no dishes, finished => redirect to restaurant page
     if not dish_names:
         return jsonify(restaurant_id)
 
-
+    # If dishes associated => handle each dish tag
     for dish in dish_names:
-        # Check if reviewed dish is in dishes table
-        dish_obj = Dish.query.filter(Dish.dish_id == dish['id']).first()
+        # If dish_id comes back from JS as a name (not id), it is a new dish
+        try:
+            int(dish['id'])
+        except Exception as e:
+            dish_obj = None
+        else:
+            dish_obj = Dish.query.filter(Dish.dish_id == dish['id']).first()
+        finally:
+            # if dish not in dishes table, add it
+            if not dish_obj:
+                dish_name = dish['name'].capitalize()
+                dish_obj = Dish(name=dish_name)
+                db.session.add(dish_obj)
+                db.session.commit()
 
-        # if dish not in dishes table and dish name not none, add it
-        if not dish_obj:
-            dish_name = dish['name'].capitalize()
-            dish_obj = Dish(name=dish_name)
-            db.session.add(dish_obj)
+            # Deal with middle table - add new review dish
+            new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
+                                         review_id=new_review.review_id)
+            db.session.add(new_review_dish)
+
+            # Deal with association table - 
+            # Check if restaurant and dish are already linked
+            rest_dish_check = RestaurantDish.query.filter_by(
+                                                    dish_id=dish_obj.dish_id,
+                                                    restaurant_id=restaurant_id
+                                                    ).first()
+            
+            # if RestaurantDish not in table, add it
+            if not rest_dish_check:
+                new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
+                                               restaurant_id=restaurant_id)
+                db.session.add(new_rest_dish)
+
             db.session.commit()
 
-        # Deal with middle table - add new review dish
-        new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
-                                     review_id=new_review.review_id)
-        db.session.add(new_review_dish)
-
-        # Deal with association table - 
-        # Check if restaurant and dish are already linked
-        rest_dish_check = RestaurantDish.query.filter_by(dish_id=dish_obj.dish_id,
-                                                         restaurant_id=restaurant_id
-                                                         ).first()
-        # if RestaurantDish not in table, add it
-        if not rest_dish_check:
-            new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
-                                           restaurant_id=restaurant_id)
-            db.session.add(new_rest_dish)
-
-        db.session.commit()
-
+    # Return to restaurant home page
     return jsonify(restaurant_id)
 
 
