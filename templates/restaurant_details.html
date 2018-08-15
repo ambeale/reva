@@ -9,7 +9,8 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>{{ restaurant.name }} <i class="far fa-heart"></i></h2>
+<h2>{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span></h2>
+
 <p>
     Address: {{ restaurant.address }}<br>
     Reviews: {{ restaurant.count_reviews }}<br>
@@ -43,11 +44,15 @@
         Price score: {{ review.price_score }} <br>
     </p>
 {% endfor %}
-    
+
+
 <script src="/static/js/restaurant_map.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
     async defer>
 </script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="http://unpkg.com/babel-standalone"></script>
+<script src="static/js/favorite.jsx" type="text/jsx"></script>
 
 
 {% endblock %}

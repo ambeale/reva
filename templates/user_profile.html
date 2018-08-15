@@ -3,7 +3,12 @@
 
 <h2>{{ user.fname }} {{ user.lname }}</h2>
 
-TO DO: List of favorites
+<h4>Favorite restaurants:</h4>
+{% for favorite in user.favorites %}
+<p>
+    <a href="{{ favorite.restaurant.restaurant_id }}">{{ favorite.restaurant.name }}</a>
+</p>
+{% endfor %}
 
 
 {% endblock %}
