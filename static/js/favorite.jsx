@@ -1,3 +1,5 @@
+// Allow user to favorite or unfavorite restaurants
+
 class FavoriteClicker extends React.Component {
   constructor() {
     super();
@@ -8,6 +10,7 @@ class FavoriteClicker extends React.Component {
     this.favSuccess = this.favSuccess.bind(this);
   }
 
+  // Set initial heart to filled if already a user's favorite
   componentDidMount() {
     if (userId !== "None") {
       fetch(`/is-favorite?restaurant=${restaurantId}&user_id=${userId}`)
@@ -21,20 +24,7 @@ class FavoriteClicker extends React.Component {
     }
   }
 
-  notLoggedIn() {
-    alert("You must be logged in to save a favorite.");
-  }
-
-  favSuccess(result) {
-    alert(result);
-    if (result === "Favorite added") {
-      heart = 'fas fa-heart';
-    } else {
-      heart = 'far fa-heart';
-    }
-    this.setState({ value: heart });
-  }
-
+  // Handle user click on heart
   addFavorite() {
     if (userId !== "None") {
       $.post("/update-favorite", 
@@ -45,6 +35,21 @@ class FavoriteClicker extends React.Component {
     }
   }
 
+  // Alert after click if user if not logged in
+  notLoggedIn() {
+    alert("You must be logged in to save a favorite.");
+  }
+
+  // Update heart icon as restaurant favorited / unfavorited
+  favSuccess(result) {
+    if (result === "Favorite added") {
+      heart = 'fas fa-heart';
+    } else {
+      heart = 'far fa-heart';
+    }
+    this.setState({ value: heart });
+  }
+
   render() {
     return (
       <span className={this.state.value} onClick={this.addFavorite}></span>
@@ -52,8 +57,12 @@ class FavoriteClicker extends React.Component {
   }
 }
 
+
+// Get user_id and restaurant_id HTML attributes
 const userId = document.querySelector('#fav').getAttribute('loggedin');
 const restaurantId = document.querySelector('#fav').getAttribute('rest');
+
+// Set empty heart as default
 let heart = 'far fa-heart';
 
 

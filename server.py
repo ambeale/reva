@@ -118,24 +118,29 @@ def display_user_profile_page():
 
 @app.route('/update-favorite', methods=["POST"])
 def update_user_favorites():
-    """Add or remove restaurant from user's favorites"""
+    """When user clicks heart icon, add or remove
+    restaurant from user's favorites"""
 
     user_id = session.get("user_id")
     restaurant_id = request.form.get("restaurant_id")
-    print("Results", user_id, restaurant_id)
 
     favorite = Favorite.query.filter(Favorite.user_id==user_id,
                                   Favorite.restaurant_id==restaurant_id
                                   ).first()
+    
+    # If already a favorite, unfavorite restaurant
     if favorite:
         db.session.delete(favorite)
-        db.session.commit()
-        return jsonify("Favorite removed")
+        message = "Favorite removed"
+    
+    # If not a favorite, add to favorites table
     else:
         new_favorite = Favorite(user_id=user_id, restaurant_id=restaurant_id)
         db.session.add(new_favorite)
-        db.session.commit()
-        return jsonify("Favorite added")
+        message = "Favorite added"
+
+    db.session.commit()
+    return jsonify(message)
 
 
 @app.route('/is-favorite')
@@ -145,11 +150,12 @@ def is_restaurant_user_favorite():
     user_id = request.args.get("user_id")
     restaurant_id = request.args.get("restaurant")
 
-    query = Favorite.query.filter(Favorite.user_id==user_id,
+    favorite = Favorite.query.filter(Favorite.user_id==user_id,
                                   Favorite.restaurant_id==restaurant_id
                                   ).first()
 
-    if query:
+    # If already a favorite, return true
+    if favorite:
         return jsonify(True)
     else:
         return jsonify(False)
