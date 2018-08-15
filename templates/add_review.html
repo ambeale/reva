@@ -1,11 +1,15 @@
+<head>
+    <link href="/static/magicsuggest/magicsuggest-min.css" rel="stylesheet">
+</head>
+
 {% extends 'base.html' %}
 {% block content %}
 
 <h3>Add a rating for {{ name }}:</h3>
-    <form action="/add-review" method="POST">
+    <form action="/add-review" id="review-form" method="POST">
         <h4>Food</h4>
             Score:
-            <select name="food-score" required>
+            <select name="food-score" id="food-score"required>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -13,13 +17,14 @@
                 <option value="5">5</option>
             </select>
         <br>
+        <div id="ms-data-ajax"></div>
         Dish name:
-            <input type="text" name="dish-name"><br>
+            <input type="text" name="dish-name" id="dish-name"><br>
         Review:<br>
-            <textarea rows="4" cols="50" name="food-comment"></textarea><br>
+            <textarea rows="4" cols="50" name="food-comment" id="food-comment" required></textarea><br>
         <h4>Service:</h4>
             Score:
-            <select name="service-score" required>
+            <select name="service-score" id="service-score" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -28,10 +33,10 @@
             </select>
         <br>
         Comment:<br>
-            <textarea rows="4" cols="50" name="service-comment"></textarea><br>
+            <textarea rows="4" cols="50" name="service-comment" id="service-comment"></textarea><br>
         <h4>Price</h4>
             Score:
-            <select name="price-score" required>
+            <select name="price-score" id="price-score" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -40,10 +45,16 @@
             </select>
         <br>
         Comment:<br>
-            <textarea rows="4" cols="50" name="price-comment"></textarea>
-        <input type="hidden" name="restaurant" value={{ restaurant_id }}>
+            <textarea rows="4" cols="50" name="price-comment" id="price-comment"></textarea>
+        <input type="hidden" name="restaurant" id="restaurant" value={{ restaurant_id }}>
+        <input type="hidden" name="user-id" id="user-id" value="{{ session.get("user_id") }}">
         <br><br>
         <input type="submit" value="Add review">
     </form>
+{% endblock %}
 
+{% block scripts %}
+<script src="/static/magicsuggest/magicsuggest-min.js"></script>
+
+<script type="text/javascript" src="static/js/add-review.js"></script>
 {% endblock %}

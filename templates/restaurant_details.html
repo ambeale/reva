@@ -44,15 +44,14 @@
         Price score: {{ review.price_score }} <br>
     </p>
 {% endfor %}
+{% endblock %}
 
-
+{% block scripts %}
 <script src="/static/js/restaurant_map.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
     async defer>
 </script>
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="http://unpkg.com/babel-standalone"></script>
 <script src="static/js/favorite.jsx" type="text/jsx"></script>
-
 
 {% endblock %}

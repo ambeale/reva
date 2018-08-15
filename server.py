@@ -12,7 +12,7 @@ from sqlalchemy import func
 
 from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
                     Favorite, connect_to_db, db)
-import os, requests
+import os, requests, json
 
 
 app = Flask(__name__)
@@ -115,6 +115,8 @@ def display_user_profile_page():
 
     return render_template("user_profile.html", user=user_info)
 
+
+### FAVORITING ROUTES ###
 
 @app.route('/update-favorite', methods=["POST"])
 def update_user_favorites():
@@ -432,6 +434,97 @@ def display_dish_reviews_from_restaurant(dish_id, restaurant_id):
                             reviews=reviews,
                             dish=dish,
                             restaurant=restaurant)
+
+
+@app.route("/get-matching-dishes.json", methods=["POST"])
+def return_matching_dishes():
+    """Query dishes table for matching entries and return json list"""
+
+    search_term = "%" + request.form.get("query") + "%"
+    print(search_term)
+
+    matching_dishes = Dish.query.filter(Dish.name.ilike(search_term)).all()
+    dishes_list = []
+
+    for dish in matching_dishes:
+        dishes_list.append({"id": dish.dish_id, "name": dish.name})
+
+    return jsonify(dishes_list)
+
+
+@app.route("/add-dishes", methods=["POST"])
+def add_dishes_to_db():
+    """"""
+
+    # Get review and dish inputs
+    user_id = request.form.get("user-id")
+    restaurant_id = request.form.get("restaurant-id")
+    food_score = request.form.get("food-score")
+    food_comment = request.form.get("food-comment")
+    service_score = request.form.get("service-score")
+    service_comment = request.form.get("service-comment")
+    price_score = request.form.get("price-score")
+    price_comment = request.form.get("price-comment")
+    dish_names = json.loads(request.form.get("dishes"))
+
+    # Check if user has already reviewed restaurant
+    user_review_check = Review.query.filter_by(user_id=user_id,
+                                               restaurant_id=restaurant_id)
+    
+    # If user has reviewed, send back to restaurant page
+    if user_review_check.first():
+        flash("You've already reviewed this restaurant")
+        return jsonify(restaurant_id)
+    
+    # Else create new review
+    else:
+        new_review = Review(user_id=user_id,
+                            restaurant_id=restaurant_id,
+                            food_score=food_score,
+                            food_comment=food_comment,
+                            service_score=service_score,
+                            service_comment=service_comment,
+                            price_score=price_score,
+                            price_comment=price_comment)
+        db.session.add(new_review)
+        db.session.commit()
+        flash("Review successfully added")
+
+    # If not dishes, finished => redirect to restuarant page
+    if not dish_names:
+        return jsonify(restaurant_id)
+
+
+    for dish in dish_names:
+        # Check if reviewed dish is in dishes table
+        dish_obj = Dish.query.filter(Dish.dish_id == dish['id']).first()
+
+        # if dish not in dishes table and dish name not none, add it
+        if not dish_obj:
+            dish_name = dish['name'].capitalize()
+            dish_obj = Dish(name=dish_name)
+            db.session.add(dish_obj)
+            db.session.commit()
+
+        # Deal with middle table - add new review dish
+        new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
+                                     review_id=new_review.review_id)
+        db.session.add(new_review_dish)
+
+        # Deal with association table - 
+        # Check if restaurant and dish are already linked
+        rest_dish_check = RestaurantDish.query.filter_by(dish_id=dish_obj.dish_id,
+                                                         restaurant_id=restaurant_id
+                                                         ).first()
+        # if RestaurantDish not in table, add it
+        if not rest_dish_check:
+            new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
+                                           restaurant_id=restaurant_id)
+            db.session.add(new_rest_dish)
+
+        db.session.commit()
+
+    return jsonify(restaurant_id)
 
 
 ####### HELPER FUNCTIONS #######
