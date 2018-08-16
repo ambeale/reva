@@ -6,7 +6,7 @@
 {% for review in user.reviews %}
     <p>
         Restaurant:
-        <a href="/{{ review.restaurant_id }}">
+        <a href="/restaurant/{{ review.restaurant_id }}">
             {{ review.restaurant.name }}</a><br>
         Food score: {{ review.food_score }} <br>
         Service score: {{ review.service_score }} <br>

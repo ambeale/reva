@@ -5,7 +5,7 @@
 
 {% for result in results %}
     <p>
-        Restaurant name: <a href="/{{ result.restaurant_id }}">{{ result.name }}</a>
+        Restaurant name: <a href="/restaurant/{{ result.restaurant_id }}">{{ result.name }}</a>
         <br>
         Avg. food rating: {{ result.food_avg }}
         <br>

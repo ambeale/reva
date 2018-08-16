@@ -22,12 +22,12 @@ reviewForm.addEventListener('submit', function (evt) {
         "dishes": JSON.stringify(dishes.getSelection())
     };
 
-    $.post("/add-dishes", 
+    $.post("/add-review", 
            formInputs,
            successFunction);
 });
 
 function successFunction(results) {
     console.log(results);
-    window.location.replace(`/${results}`);
+    window.location.replace(`/restaurant/${results}`);
 }

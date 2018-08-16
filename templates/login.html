@@ -3,7 +3,7 @@
 
 <h2>User Login</h2>
 
-<form action='/login'>
+<form action='/login' method="POST">
     Email:
     <input type="text" name="email"><br>
     Password:
@@ -11,6 +11,7 @@
     <input type="submit" value="Login">
 </form>
 
+<br>
 <p>Don't have an account? Create one here:</p>
 <form action='/new-account-form'>
     <input type="submit" value="Create account">

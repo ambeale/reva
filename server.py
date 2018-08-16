@@ -40,12 +40,12 @@ def display_login_page():
     return render_template("login.html")
 
 
-@app.route('/login') # TO DO: add POST
+@app.route('/login', methods=["POST"]) 
 def user_login():
     """Log user into application"""
 
-    user_email = request.args.get("email")
-    password = request.args.get("password")
+    user_email = request.form.get("email")
+    password = request.form.get("password")
 
     user_obj = User.query.filter_by(email=user_email).first()
 
@@ -56,6 +56,7 @@ def user_login():
 
     elif user_obj.password == password:
         session['user_id'] = user_obj.user_id
+        session['fname'] = user_obj.fname
         flash("Successfully logged in")
         return redirect("/")
 
@@ -64,11 +65,12 @@ def user_login():
         return redirect("/login")
 
 
-@app.route('/logout') # TO DO: add POST
+@app.route('/logout')
 def user_logout():
     """Log user out"""
 
     del session['user_id']
+    del session['fname']
 
     flash("You're logged out. See you next time.")
     return redirect('/')
@@ -183,7 +185,7 @@ def display_restaurant_results():
                              results=full_results)
 
 
-@app.route('/<place_id>')
+@app.route('/restaurant/<place_id>')
 def display_restaurant(place_id):
     """display resturant details and reviews"""
 
@@ -213,8 +215,8 @@ def display_restaurant(place_id):
         # Details to create Restaurant object
         name = result['name']
         phone_number = result.get('formatted_phone_number')
-        address = result['formatted_address']
-        website = result['website']
+        address = result.get('formatted_address')
+        website = result.get('website')
         lat = result['geometry']['location']['lat']
         lon = result['geometry']['location']['lng']
 
@@ -274,22 +276,16 @@ def render_restaurant_dish_search():
 def add_review():
     """Add user's review to database"""
 
-    # Get review inputs
-    user_id = session.get("user_id")
-    restaurant_id = request.form.get("restaurant")
+    # Get review and dish inputs
+    user_id = request.form.get("user-id")
+    restaurant_id = request.form.get("restaurant-id")
     food_score = request.form.get("food-score")
     food_comment = request.form.get("food-comment")
     service_score = request.form.get("service-score")
     service_comment = request.form.get("service-comment")
     price_score = request.form.get("price-score")
     price_comment = request.form.get("price-comment")
-    
-    # Get dish inputs
-    dish_name = request.form.get("dish-name")
-    if dish_name:
-        # capitalize for style consistency in DB
-        dish_name = dish_name.capitalize()
-    dish_comment = request.form.get("dish-comment")
+    dish_names = json.loads(request.form.get("dishes"))
 
     # Check if user has already reviewed restaurant
     user_review_check = Review.query.filter_by(user_id=user_id,
@@ -298,7 +294,7 @@ def add_review():
     # If user has reviewed, send back to restaurant page
     if user_review_check.first():
         flash("You've already reviewed this restaurant")
-        return redirect('/{}'.format(restaurant_id))
+        return jsonify(restaurant_id)
     
     # Else create new review
     else:
@@ -314,35 +310,14 @@ def add_review():
         db.session.commit()
         flash("Review successfully added")
 
-    # Check if reviewed dish is in dishes table
-    dish_obj = Dish.query.filter(Dish.name == dish_name).first()
+    # If no dishes, finished => redirect to restaurant page
+    if not dish_names:
+        return jsonify(restaurant_id)
 
-    # if dish not in dishes table and dish name not none, add it
-    if not dish_obj and dish_name:
-        dish_obj = Dish(name=dish_name)
-        db.session.add(dish_obj)
-        db.session.commit()
+    add_dishes_to_db(dish_names, new_review, restaurant_id)
 
-    # Deal with middle table - add new review dish
-    new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
-                                 review_id=new_review.review_id,
-                                 dish_comment=dish_comment)
-    db.session.add(new_review_dish)
-
-    # Deal with association table - 
-    # Check if restaurant and dish are already linked
-    rest_dish_check = RestaurantDish.query.filter_by(dish_id=dish_obj.dish_id,
-                                                     restaurant_id=restaurant_id
-                                                     ).first()
-    # if RestaurantDish not in table, add it
-    if not rest_dish_check:
-        new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
-                                       restaurant_id=restaurant_id)
-        db.session.add(new_rest_dish)
-
-    db.session.commit()
-
-    return redirect('/{}'.format(restaurant_id))
+    # Return to restaurant home page
+    return jsonify(restaurant_id)
 
 ######### USER SEARCH ROUTES ###########
 
@@ -410,18 +385,6 @@ def deplay_dish_details(dish_id, location):
 def display_dish_reviews_from_restaurant(dish_id, restaurant_id):
     """Display reviews associated with a given dish and restaurant"""
 
-    # sql = """SELECT rev.*
-    #             FROM review_dishes rd
-    #             LEFT JOIN reviews rev
-    #                 USING (review_id)
-    #             WHERE rev.restaurant_id = :rest_id
-    #                 AND rd.dish_id = :dish
-    #         """
-    # cursor = db.session.execute(sql,
-    #                             {'rest_id': restaurant_id, 'dish': dish_id})
-    # reviews = cursor.fetchall()
-
-
     query = db.session.query(Review).join(ReviewDish)
     reviews = query.filter(Review.restaurant_id==restaurant_id,
                             ReviewDish.dish_id==dish_id).all()
@@ -452,47 +415,10 @@ def return_matching_dishes():
     return jsonify(dishes_list)
 
 
-@app.route("/add-dishes", methods=["POST"])
-def add_dishes_to_db():
-    """"""
+####### HELPER FUNCTIONS #######
 
-    # Get review and dish inputs
-    user_id = request.form.get("user-id")
-    restaurant_id = request.form.get("restaurant-id")
-    food_score = request.form.get("food-score")
-    food_comment = request.form.get("food-comment")
-    service_score = request.form.get("service-score")
-    service_comment = request.form.get("service-comment")
-    price_score = request.form.get("price-score")
-    price_comment = request.form.get("price-comment")
-    dish_names = json.loads(request.form.get("dishes"))
-
-    # Check if user has already reviewed restaurant
-    user_review_check = Review.query.filter_by(user_id=user_id,
-                                               restaurant_id=restaurant_id)
-    
-    # If user has reviewed, send back to restaurant page
-    if user_review_check.first():
-        flash("You've already reviewed this restaurant")
-        return jsonify(restaurant_id)
-    
-    # Else create new review
-    else:
-        new_review = Review(user_id=user_id,
-                            restaurant_id=restaurant_id,
-                            food_score=food_score,
-                            food_comment=food_comment,
-                            service_score=service_score,
-                            service_comment=service_comment,
-                            price_score=price_score,
-                            price_comment=price_comment)
-        db.session.add(new_review)
-        db.session.commit()
-        flash("Review successfully added")
-
-    # If no dishes, finished => redirect to restaurant page
-    if not dish_names:
-        return jsonify(restaurant_id)
+def add_dishes_to_db(dish_names, new_review, restaurant_id):
+    """Add dishes to dishes table and middle tables"""
 
     # If dishes associated => handle each dish tag
     for dish in dish_names:
@@ -531,11 +457,6 @@ def add_dishes_to_db():
 
             db.session.commit()
 
-    # Return to restaurant home page
-    return jsonify(restaurant_id)
-
-
-####### HELPER FUNCTIONS #######
 
 def restaurant_api_call(term, location):
     """Call Google Places Text Search API using given search terms
