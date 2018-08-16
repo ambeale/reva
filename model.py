@@ -41,7 +41,7 @@ class Restaurant(db.Model):
     __tablename__ = "restaurants"
 
     restaurant_id = db.Column(db.String(200), primary_key=True)
-    name = db.Column(db.String(200), nullable=True)
+    name = db.Column(db.String(200), nullable=True) # change to False
     phone_number = db.Column(db.String(20), nullable=True)
     address = db.Column(db.String(200), nullable=True)
     website = db.Column(db.String(200), nullable=True)

@@ -49,26 +49,29 @@ def user_login():
 
     user_obj = User.query.filter_by(email=user_email).first()
 
+    # If user not in db, flash "user not found"
     if user_obj is None:
-        #flash you don't exist 
         flash("No user found with that email")
-        return redirect('/login')
+        return redirect('/login-form')
 
+    # If username and password match db, save user_id and name to session
     elif user_obj.password == password:
         session['user_id'] = user_obj.user_id
         session['fname'] = user_obj.fname
         flash("Successfully logged in")
         return redirect("/")
 
+    # If user found, but password wrong, flash "wrong password"
     else:
         flash("Password incorrect")
-        return redirect("/login")
+        return redirect("/login-form")
 
 
 @app.route('/logout')
 def user_logout():
     """Log user out"""
 
+    # Delete user_id and name from session
     del session['user_id']
     del session['fname']
 
@@ -96,7 +99,7 @@ def create_new_user():
     email_match = User.query.filter(User.email == new_email).first()
 
     if email_match:
-        flash('You already exist.')
+        flash('Account for this email already created')
     else:
         new_user = User(email=new_email, fname=fname, lname=lname,
                         password=password, zipcode=zipcode)
@@ -108,11 +111,16 @@ def create_new_user():
     return redirect('/login-form')
 
 
-@app.route('/user-profile')
+@app.route('/profile')
 def display_user_profile_page():
     """Render user's profile page"""
 
     user = session.get("user_id")
+
+    if not user:
+        flash("Please log in to view this page")
+        return redirect('/login-form')
+
     user_info = User.query.filter_by(user_id=user).first()
 
     return render_template("user_profile.html", user=user_info)
@@ -244,6 +252,12 @@ def display_restaurant(place_id):
 def render_review_creation_page():
     """Take user to page to create review"""
 
+    user = session.get("user_id")
+
+    if not user:
+        flash("Please log in to add a review")
+        return redirect('/login-form')
+
     name = request.args.get("restaurant-name")
     restaurant = request.args.get("restaurant-id")
 
@@ -318,6 +332,7 @@ def add_review():
 
     # Return to restaurant home page
     return jsonify(restaurant_id)
+
 
 ######### USER SEARCH ROUTES ###########
 

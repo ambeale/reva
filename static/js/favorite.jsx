@@ -3,7 +3,7 @@
 class FavoriteClicker extends React.Component {
   constructor() {
     super();
-    this.state = { value: heart };
+    this.state = { value: heartEmpty };
 
     this.addFavorite = this.addFavorite.bind(this);
     this.notLoggedIn = this.notLoggedIn.bind(this);
@@ -17,8 +17,7 @@ class FavoriteClicker extends React.Component {
       .then(response => response.json())
       .then(data => {
         if (data === true) {
-          heart = 'fas fa-heart';
-          this.setState({ value: heart });
+          this.setState({ value: heartFilled });
         }
       })
     }
@@ -43,11 +42,10 @@ class FavoriteClicker extends React.Component {
   // Update heart icon as restaurant favorited / unfavorited
   favSuccess(result) {
     if (result === "Favorite added") {
-      heart = 'fas fa-heart';
+      this.setState({ value: heartFilled });
     } else {
-      heart = 'far fa-heart';
+      this.setState({ value: heartEmpty });
     }
-    this.setState({ value: heart });
   }
 
   render() {
@@ -63,7 +61,8 @@ const userId = document.querySelector('#fav').getAttribute('loggedin');
 const restaurantId = document.querySelector('#fav').getAttribute('rest');
 
 // Set empty heart as default
-let heart = 'far fa-heart';
+let heartEmpty = 'far fa-heart';
+let heartFilled = 'fas fa-heart';
 
 
 ReactDOM.render(

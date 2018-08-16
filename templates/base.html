@@ -15,7 +15,7 @@
         <a href="/login-form">Log In / Create Account</a>
     {% endif %} 
     {% if session.get("user_id") %}
-        | <a href="/user-profile">{{ session.get("fname") }}'s Profile</a>
+        | <a href="/profile">{{ session.get("fname") }}'s Profile</a>
     {% endif %}
     <hr>
 

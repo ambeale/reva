@@ -11,4 +11,17 @@
 {% endfor %}
 
 
+<h4>Reviews:</h4>
+
+{% for review in user.reviews %}
+    <p>
+        Restaurant:
+        <a href="/restaurant/{{ review.restaurant_id }}">
+            {{ review.restaurant.name }}</a><br>
+        Food score: {{ review.food_score }} <br>
+        Service score: {{ review.service_score }} <br>
+        Price score: {{ review.price_score }} <br>
+    </p>
+{% endfor %}
+
 {% endblock %}
