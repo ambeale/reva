@@ -3,6 +3,14 @@
       #map {
         height: 50%;
       }
+      #rating-chart div {
+          font: 10px sans-serif;
+          /*background-color: steelblue;*/
+          text-align: right;
+          padding: 3px;
+          margin: 1px;
+          color: white;
+        }
     </style>
 </head>
 
@@ -16,6 +24,8 @@
     Reviews: {{ restaurant.count_reviews }}<br>
     Overall rating: {{ restaurant.reva_rating }}
 </p>
+
+<div id="rating-chart" restaurant="{{ restaurant.restaurant_id }}"></div>
 
 <div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
 
@@ -51,6 +61,8 @@
 <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
     async defer>
 </script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="/static/js/rating_graph.js"></script>
 <script src="http://unpkg.com/babel-standalone"></script>
 <script src="/static/js/favorite.jsx" type="text/jsx"></script>
 

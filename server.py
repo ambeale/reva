@@ -32,12 +32,17 @@ def index():
     return render_template("homepage.html")
 
 
-### LOG IN / OUT ROUTES
+### LOG IN / OUT ROUTES ###
 @app.route('/login-form')
 def display_login_page():
     """Display login page"""
 
-    return render_template("login.html")
+    user = session.get("user_id")
+
+    if user:
+        return redirect('/')
+    else:
+        return render_template("login.html")
 
 
 @app.route('/login', methods=["POST"]) 
@@ -71,11 +76,12 @@ def user_login():
 def user_logout():
     """Log user out"""
 
-    # Delete user_id and name from session
-    del session['user_id']
-    del session['fname']
+    if session.get("user_id"):
+        # Delete user_id and name from session
+        session.pop('user_id', None)
+        session.pop('fname', None)
 
-    flash("You're logged out. See you next time.")
+        flash("You're logged out. See you next time.")
     return redirect('/')
 
 
@@ -246,6 +252,16 @@ def display_restaurant(place_id):
         return render_template("restaurant_details.html",
                                 restaurant=new_restaurant,
                                 api_key=os.environ['GOOGLE_API_KEY'])
+
+
+@app.route("/ratings/<restaurant_id>.json")
+def render_bar_chart(restaurant_id):
+    """Given restaurant id, return json response of average ratings"""
+
+    restaurant = Restaurant.query.filter_by(restaurant_id=restaurant_id).first()
+    ratings = calculate_individual_ratings(restaurant.reviews)
+
+    return jsonify([round(score,2) for score in ratings])
 
 
 @app.route("/review-form")
@@ -588,6 +604,20 @@ def calculate_user_review_count(user_list):
         user.count_reviews = review_count
 
     return user_list
+
+
+def example_data():
+    """Create some sample user data."""
+
+    User.query.delete()
+
+    jane = User(user_id=1, email='jane@gmail.com', fname='Jane', lname='Doe',
+                password='hellojane')
+    jack = User(user_id=2, email='jack@gmail.com', fname='Jack', lname='Dee',
+                password='hellojack')
+
+    db.session.add_all([jane, jack])
+    db.session.commit()
 
 
 if __name__ == "__main__":
