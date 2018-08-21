@@ -17,11 +17,12 @@ function makeRatingGraph(data) {
           .data(graph_data)
             .enter()
             .append("div")
+            .style("background-color", function(d) {
+                return color(Math.random());
+            }) // use Random to avoid situations where some catories have the same score (and thus color)
             .style("width", function(d) { return d*50 + "px"; })
-            .style("background-color", function(d) { return color(d); })
-            .text(function(d) { return d; });
-        }
-    else {
+            .text(function(d) { return d.toFixed(2); });
+    } else {
         graph_data = ["N/A", "N/A", "N/A"]
         d3.select("#rating-chart")
           .selectAll("div")
