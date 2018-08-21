@@ -1,7 +1,7 @@
 <head>
     <style>
       #map {
-        height: 50%;
+          height: 50%;
       }
       #rating-chart div {
           font: 10px sans-serif;
@@ -11,6 +11,17 @@
           margin: 1px;
           color: white;
         }
+      #rating-label {
+          font: 13px sans-serif;
+          line-height: 19px;
+        }
+      .inline-block-paragraph {
+          display: inline-block;
+          width: 50px;
+          height: 75px;
+          font: 10px sans-serif;
+          vertical-align: top;
+    }
     </style>
 </head>
 
@@ -25,7 +36,12 @@
     Overall rating: {{ restaurant.reva_rating }}
 </p>
 
-<div id="rating-chart" restaurant="{{ restaurant.restaurant_id }}"></div>
+<div id="rating-label" class="inline-block-paragraph">
+    Food: <br>
+    Service:<br>
+    Price: 
+</div>
+<div id="rating-chart" class="inline-block-paragraph" restaurant="{{ restaurant.restaurant_id }}"></div>
 
 <div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
 

@@ -259,9 +259,12 @@ def render_bar_chart(restaurant_id):
     """Given restaurant id, return json response of average ratings"""
 
     restaurant = Restaurant.query.filter_by(restaurant_id=restaurant_id).first()
-    ratings = calculate_individual_ratings(restaurant.reviews)
+    if restaurant.reviews:
+        ratings = calculate_individual_ratings(restaurant.reviews)
+        return jsonify([round(score,2) for score in ratings])
 
-    return jsonify([round(score,2) for score in ratings])
+    else:
+        return jsonify("no reviews")
 
 
 @app.route("/review-form")

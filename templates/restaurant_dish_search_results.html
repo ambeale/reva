@@ -8,5 +8,13 @@
 </p>
 {% endfor %}
 
+{% if not dishes %}
+<p>No matching dishes found</p>
+{% endif %}
+-----------------
+<p>
+    <a href="/restaurant/{{ restaurant_id }}">Back to reviews</a>
+</p>
+
 
 {% endblock %}
