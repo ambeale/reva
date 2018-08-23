@@ -42,7 +42,7 @@ def display_login_page():
     if user:
         return redirect('/')
     else:
-        return render_template("login.html")
+        return render_template("login-bootstrap.html")
 
 
 @app.route('/login', methods=["POST"]) 
@@ -179,6 +179,16 @@ def is_restaurant_user_favorite():
         return jsonify(False)
 
 
+### API ROUTE ###
+
+@app.route('/geocode-helper')
+def return_key_for_geocoding():
+    """Return API key to allow front-end to geocode location
+    with Google API request"""
+
+    return jsonify(os.environ['GOOGLE_API_KEY'])
+
+
 ### RESTAURANT ROUTES ###
 
 @app.route('/restaurant-search')
@@ -193,6 +203,7 @@ def display_restaurant_results():
     response = restaurant_api_call(term, location)
     results = add_rest_review_count_json(response)
     full_results = add_rest_ratings_json(results)
+    print(results)
 
     # Render template with search results
     return render_template("restaurant_search_results.html",
@@ -497,11 +508,11 @@ def restaurant_api_call(term, location):
     and return results"""
 
     search_term = term.replace(" ", "+")
-    search_location = location.replace(",","").replace(" ", "+")
-    # query = search_term + "+in+" + search_location
+    lat_lng = get_geocoded_lat_lon(location)
 
-    payload = {'query': search_term + "+in+" + search_location,
-                'type': 'restaurant',
+    payload = {'query': search_term,
+                'location': "{},{}".format(lat_lng['lat'], lat_lng['lng']),
+                'type': 'food', #bakery, bar, cafe, restaurant, supermarket, meal_takeaway, meal_delivery
                 'key': os.environ['GOOGLE_API_KEY']}
     url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
@@ -509,6 +520,24 @@ def restaurant_api_call(term, location):
     results = r['results']
 
     return results
+
+
+def get_geocoded_lat_lon(location):
+    """Given string of search location,
+    return lat and lon using Google Geocoding API"""
+
+    # Format input for search
+    search_location = location.replace(",","").replace(" ", "+")
+
+    payload = {'address': search_location,
+                'key': os.environ['GOOGLE_API_KEY']}
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?'
+
+    # Make request to Geocoding API and return lat lng of result
+    r = requests.get(url, params=payload).json()
+    lat_lng = r['results'][0]['geometry']['location']
+
+    return lat_lng
 
 
 def add_rest_review_count_json(results):
