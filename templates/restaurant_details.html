@@ -1,7 +1,7 @@
 <head>
     <style>
       #map {
-          height: 50%;
+          height: 35%;
       }
       #rating-chart div {
           font: 10px sans-serif;
@@ -23,37 +23,53 @@
           font: 10px sans-serif;
           vertical-align: top;
     }
+      .jumbotron {
+        margin-top: 30px;
+        padding-top: 30px !important; 
+        padding-bottom: 30px !important;
+      }
     </style>
 </head>
 
 {% extends 'base.html' %}
 {% block content %}
-
-<h2>{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span></h2>
-
-<p>
-    Address: {{ restaurant.address }}<br>
-    Reviews: {{ restaurant.count_reviews }}<br>
-    Overall rating: {{ restaurant.reva_rating }}
-</p>
-
-<div id="rating-label" class="inline-block-paragraph">
-    Food: <br>
-    Service:<br>
-    Price: 
+<main role="main">
+  <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span></h2>
+  <div class="jumbotron">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
+          <h3>Details</h3>
+          <p>
+          Address: {{ restaurant.address }}<br>
+          Reviews: {{ restaurant.count_reviews }}<br>
+          Overall rating: {{ restaurant.reva_rating }}
+          </p>
+          <h3>Ratings</h3>
+          <div id="rating-label" class="inline-block-paragraph">
+          Food: <br>
+          Service:<br>
+          Price: 
+          </div>
+          <div id="rating-chart" class="inline-block-paragraph" restaurant="{{ restaurant.restaurant_id }}"></div>
+        </div>
+        <div class="col-md-4">
+          <div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
+        </div>
+    </div>
+  </div>
 </div>
-<div id="rating-chart" class="inline-block-paragraph" restaurant="{{ restaurant.restaurant_id }}"></div>
 
-<div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
 
 <h3>Reviews</h3>
 
 {% if session.get("user_id") %}
-    <form action="/review-form">
-        <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
-        <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
-        <input type="submit" value="Add a rating">
-    </form>
+<form action="/review-form">
+    <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
+    <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
+    <input type="submit" value="Add a rating">
+</form>
 {% endif %}
 
 <form action="/restaurant-dish-search">
@@ -63,14 +79,25 @@
     <input type="submit" value="Search">
 </form>
 
-{% for review in restaurant.reviews %}
-    <p>
-        Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br>
-        Food score: {{ review.food_score }} <br>
-        Service score: {{ review.service_score }} <br>
-        Price score: {{ review.price_score }} <br>
-    </p>
-{% endfor %}
+<div class="container-fluid">
+  <div class="row">
+    {% for review in restaurant.reviews %}
+      <div class="col-md-4">
+        <h4>Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br></h4>
+        <p>
+          Food score: {{ review.food_score }} <br>
+          Comment: {{ review.food_comment }} <br>
+          Service score: {{ review.service_score }} <br>
+          Comment: {{ review.service_comment }} <br>
+          Price score: {{ review.price_score }} <br>
+          Comment: {{ review.price_comment }} <br>
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+</main>
 {% endblock %}
 
 {% block scripts %}

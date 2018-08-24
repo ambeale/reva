@@ -108,6 +108,7 @@ class Review(db.Model):
                                                 self.user_id,
                                                 self.restaurant_id)
 
+
 class Dish(db.Model):
     """Food dishes on website."""
 
@@ -144,6 +145,7 @@ class ReviewDish(db.Model):
                     review_id={}""".format(self.review_dish_id, 
                                            self.dish_id,
                                            self.review_id)
+
 
 class RestaurantDish(db.Model):
     """Association table between restaurants and dishes."""

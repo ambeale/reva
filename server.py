@@ -10,10 +10,14 @@ from datetime import datetime
 
 from sqlalchemy import func
 
+from werkzeug import secure_filename
+
 from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
                     Favorite, connect_to_db, db)
 import os, requests, json
 
+UPLOAD_FOLDER = '/static/photo-uploads'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
 
@@ -203,7 +207,6 @@ def display_restaurant_results():
     response = restaurant_api_call(term, location)
     results = add_rest_review_count_json(response)
     full_results = add_rest_ratings_json(results)
-    print(results)
 
     # Render template with search results
     return render_template("restaurant_search_results.html",
@@ -322,14 +325,13 @@ def add_review():
 
     # Get review and dish inputs
     user_id = request.form.get("user-id")
-    restaurant_id = request.form.get("restaurant-id")
-    food_score = request.form.get("food-score")
-    food_comment = request.form.get("food-comment")
-    service_score = request.form.get("service-score")
-    service_comment = request.form.get("service-comment")
-    price_score = request.form.get("price-score")
-    price_comment = request.form.get("price-comment")
-    dish_names = json.loads(request.form.get("dishes"))
+    restaurant_id = request.form.get("restaurant")
+    uploaded_files = request.files.getlist("file")
+
+    if uploaded_files:
+        for file in uploaded_files:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     # Check if user has already reviewed restaurant
     user_review_check = Review.query.filter_by(user_id=user_id,
@@ -339,9 +341,17 @@ def add_review():
     if user_review_check.first():
         flash("You've already reviewed this restaurant")
         return jsonify(restaurant_id)
-    
+
     # Else create new review
     else:
+        food_score = request.form.get("food-score")
+        food_comment = request.form.get("food-comment")
+        service_score = request.form.get("service-score")
+        service_comment = request.form.get("service-comment")
+        price_score = request.form.get("price-score")
+        price_comment = request.form.get("price-comment")
+        dish_names = json.loads(request.form.get("dishes"))
+
         new_review = Review(user_id=user_id,
                             restaurant_id=restaurant_id,
                             food_score=food_score,
@@ -362,7 +372,6 @@ def add_review():
 
     # Return to restaurant home page
     return jsonify(restaurant_id)
-
 
 ######### USER SEARCH ROUTES ###########
 
@@ -596,7 +605,7 @@ def calculate_overall_rating(reviews):
     food_avg, service_avg, price_avg = calculate_individual_ratings(reviews)    
 
     # Calculate overall average using proprietary algorithm
-    overall_avg = round((food_avg * 0.5) + (service_avg * 0.35)
+    overall_avg = round((food_avg * 0.55) + (service_avg * 0.3)
                                          + (price_avg * 0.15), 2)
 
     return overall_avg
@@ -665,5 +674,6 @@ if __name__ == "__main__":
     DebugToolbarExtension(app)
 
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+    app.config['UPLOAD_FOLDER'] = './static/photo-uploads'
 
     app.run(port=5000, host='0.0.0.0')

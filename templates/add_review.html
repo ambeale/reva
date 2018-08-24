@@ -5,9 +5,11 @@
 {% extends 'base.html' %}
 {% block content %}
 
+
 <h3>Add a rating for {{ name }}:</h3>
-    <form action="/add-review" id="review-form" method="POST">
+    <form action="/add-review" id="review-form" enctype=multipart/form-data method="POST">
         <h4>Food</h4>
+        <div class="container">
             Score:
             <select name="food-score" id="food-score"required>
                 <option value="1">1</option>
@@ -19,9 +21,13 @@
         <br>
         Dishes:
         <div id="ms-data-ajax"></div>
+        <input type="file" name="file" accept="image/*" id="photos" multiple>
+        <br>
         Review:<br>
             <textarea rows="4" cols="50" name="food-comment" id="food-comment" required></textarea><br>
+        </div>
         <h4>Service:</h4>
+            <div class="container">
             Score:
             <select name="service-score" id="service-score" required>
                 <option value="1">1</option>
@@ -33,7 +39,9 @@
         <br>
         Comment:<br>
             <textarea rows="4" cols="50" name="service-comment" id="service-comment"></textarea><br>
+        </div>
         <h4>Price</h4>
+        <div class="container">
             Score:
             <select name="price-score" id="price-score" required>
                 <option value="1">1</option>
@@ -48,6 +56,7 @@
         <input type="hidden" name="restaurant" id="restaurant" value={{ restaurant_id }}>
         <input type="hidden" name="user-id" id="user-id" value="{{ session.get("user_id") }}">
         <br><br>
+    </div>
         <input type="submit" value="Add review">
     </form>
 {% endblock %}
@@ -56,4 +65,5 @@
 <script src="/static/magicsuggest/magicsuggest-min.js"></script>
 
 <script type="text/javascript" src="static/js/add-review.js"></script>
+
 {% endblock %}
