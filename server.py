@@ -323,11 +323,9 @@ def render_restaurant_dish_search():
 def add_review():
     """AJAX call to add a user's review to database"""
 
-    # Get review and dish inputs
+     # Check if user has already reviewed restaurant
     user_id = request.form.get("user-id")
     restaurant_id = request.form.get("restaurant")
-
-    # Check if user has already reviewed restaurant
     user_review_check = Review.query.filter_by(user_id=user_id,
                                                restaurant_id=restaurant_id)
     
@@ -356,6 +354,8 @@ def add_review():
                             price_score=price_score,
                             price_comment=price_comment)
         db.session.add(new_review)
+        
+        # Need to commit to access assigned review_id
         db.session.commit()
         flash("Review successfully added")
     
@@ -363,14 +363,13 @@ def add_review():
     if uploaded_files:
         add_photos_to_db(uploaded_files, new_review, user_id)
 
-    # If no dishes, finished => redirect to restaurant page
-    if not dish_names:
-        return jsonify(restaurant_id)
+    # If review contains dishes, add dishes to db 
+    if dish_names:
+        add_dishes_to_db(dish_names, new_review, restaurant_id)
 
-    add_dishes_to_db(dish_names, new_review, restaurant_id)
-
-    # Return restaurant_id to AJAX call to redirect
+    # Return restaurant_id to complete AJAX call and redirect
     return jsonify(restaurant_id)
+
 
 ######### USER SEARCH ROUTES ###########
 
@@ -474,8 +473,10 @@ def add_photos_to_db(uploaded_files, new_review, user_id):
     """Add photos to Photo table"""
 
     for file in uploaded_files:
-        # Save file to folder using Flask
+        # Add user_id to photo name to avoid cross-user duplicates
         filename = "userid{}_".format(user_id) + secure_filename(file.filename)
+        
+        # Save file to local folder using Flask
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
         # Save url of photo to db
