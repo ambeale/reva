@@ -109,6 +109,26 @@ class Review(db.Model):
                                                 self.restaurant_id)
 
 
+class Photo(db.Model):
+    """Photos associated with a review."""
+
+    __tablename__ = "photos"
+
+    photo_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    review_id = db.Column(db.Integer, db.ForeignKey('reviews.review_id'))
+    url = db.Column(db.String(300), nullable=False)
+
+    # Relationships
+    review = db.relationship("Review", backref=db.backref("photos"))
+
+
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        return "<Photo photo_id={} url={}".format(self.photo_id, 
+                                                 self.url)
+
+
 class Dish(db.Model):
     """Food dishes on website."""
 
@@ -137,6 +157,7 @@ class ReviewDish(db.Model):
     # Relationships
     review = db.relationship("Review", backref=db.backref("review_dishes"))
     dish = db.relationship("Dish", backref=db.backref("review_dishes"))
+
 
     def __repr__(self):
         """Provide helpful representation when printed"""

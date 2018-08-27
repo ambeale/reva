@@ -13,7 +13,7 @@ from sqlalchemy import func
 from werkzeug import secure_filename
 
 from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
-                    Favorite, connect_to_db, db)
+                    Favorite, Photo, connect_to_db, db)
 import os, requests, json
 
 UPLOAD_FOLDER = '/static/photo-uploads'
@@ -321,17 +321,11 @@ def render_restaurant_dish_search():
 
 @app.route("/add-review", methods=["POST"])
 def add_review():
-    """Add user's review to database"""
+    """AJAX call to add a user's review to database"""
 
     # Get review and dish inputs
     user_id = request.form.get("user-id")
     restaurant_id = request.form.get("restaurant")
-    uploaded_files = request.files.getlist("file")
-
-    if uploaded_files:
-        for file in uploaded_files:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     # Check if user has already reviewed restaurant
     user_review_check = Review.query.filter_by(user_id=user_id,
@@ -351,6 +345,7 @@ def add_review():
         price_score = request.form.get("price-score")
         price_comment = request.form.get("price-comment")
         dish_names = json.loads(request.form.get("dishes"))
+        uploaded_files = request.files.getlist("file")
 
         new_review = Review(user_id=user_id,
                             restaurant_id=restaurant_id,
@@ -363,6 +358,10 @@ def add_review():
         db.session.add(new_review)
         db.session.commit()
         flash("Review successfully added")
+    
+    # If review contains photos, add photos to db
+    if uploaded_files:
+        add_photos_to_db(uploaded_files, new_review, user_id)
 
     # If no dishes, finished => redirect to restaurant page
     if not dish_names:
@@ -370,7 +369,7 @@ def add_review():
 
     add_dishes_to_db(dish_names, new_review, restaurant_id)
 
-    # Return to restaurant home page
+    # Return restaurant_id to AJAX call to redirect
     return jsonify(restaurant_id)
 
 ######### USER SEARCH ROUTES ###########
@@ -470,6 +469,22 @@ def return_matching_dishes():
 
 
 ####### HELPER FUNCTIONS #######
+
+def add_photos_to_db(uploaded_files, new_review, user_id):
+    """Add photos to Photo table"""
+
+    for file in uploaded_files:
+        # Save file to folder using Flask
+        filename = "userid{}_".format(user_id) + secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        
+        # Save url of photo to db
+        photo = Photo(review_id=new_review.review_id,
+                      url="/static/photo-uploads/" + filename)
+        db.session.add(photo)
+
+    db.session.commit()
+
 
 def add_dishes_to_db(dish_names, new_review, restaurant_id):
     """Add dishes to dishes table and middle tables"""
