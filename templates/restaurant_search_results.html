@@ -8,4 +8,10 @@
     Rating: {{ result.reva_rating }}
 {% endfor %}
 
+{% if next_page %}
+<div>
+    <a href="/restaurant-search/page/{{ next_page }}">Next Page</a>
+</div>
+{% endif %}
+
 {% endblock %}

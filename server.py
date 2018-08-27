@@ -80,12 +80,13 @@ def user_login():
 def user_logout():
     """Log user out"""
 
+    # Only remove if user_id in session (i.e., user is logged in)
     if session.get("user_id"):
-        # Delete user_id and name from session
-        session.pop('user_id', None)
-        session.pop('fname', None)
+        session.pop("user_id", None)
+        session.pop("fname", None)
 
         flash("You're logged out. See you next time.")
+    
     return redirect('/')
 
 
@@ -195,22 +196,32 @@ def return_key_for_geocoding():
 
 ### RESTAURANT ROUTES ###
 
-@app.route('/restaurant-search')
-def display_restaurant_results():
+@app.route('/restaurant-search/', defaults={'page': 1})
+@app.route('/restaurant-search/page/<page>')
+def display_restaurant_results(page):
     """Call Google API with given search terms and return restaurants"""
 
-    # Get submitted search terms
-    term = request.args.get('search-restaurant')
-    location = request.args.get('restaurant-location')
+    # If initial page of results, call Google Places API with search terms
+    if page == 1:
+        search_term = request.args.get('search-restaurant')
+        location = request.args.get('restaurant-location')
+        response = restaurant_search_api_call(search_term, location)
+    
+    # Else call Google Places API with next_page token
+    else:
+        response = additional_results_api_call(page)
+    
+    # Save any additional results (Google limits first page to 20 results)
+    next_page_token = response.get('next_page_token', None)
 
-    # Call helper function to make Google Places API call
-    response = restaurant_api_call(term, location)
-    results = add_rest_review_count_json(response)
-    full_results = add_rest_ratings_json(results)
+    # For each restaurant returned by API, add reviews + rating from db
+    results_w_count = add_rest_review_count_json(response['results'])
+    full_results = add_rest_ratings_json(results_w_count)
 
     # Render template with search results
     return render_template("restaurant_search_results.html",
-                             results=full_results)
+                           results=full_results,
+                           next_page=next_page_token)
 
 
 @app.route('/restaurant/<place_id>')
@@ -528,7 +539,7 @@ def add_dishes_to_db(dish_names, new_review, restaurant_id):
             db.session.commit()
 
 
-def restaurant_api_call(term, location):
+def restaurant_search_api_call(term, location):
     """Call Google Places Text Search API using given search terms
     and return results"""
 
@@ -541,8 +552,19 @@ def restaurant_api_call(term, location):
                 'key': os.environ['GOOGLE_API_KEY']}
     url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
-    r = requests.get(url, params=payload).json()
-    results = r['results']
+    results = requests.get(url, params=payload).json()
+
+    return results
+
+
+def additional_results_api_call(next_page_token):
+    """Display additional pages of restaurant results"""
+
+    payload = {'pagetoken': next_page_token,
+                'key': os.environ['GOOGLE_API_KEY']}
+    url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
+
+    results = requests.get(url, params=payload).json()
 
     return results
 
