@@ -1,17 +1,50 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{% for result in results %}
-    <h3><a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a></h3>
-    {{ result.formatted_address }}<br>
-    Reviews: {{ result.count_reviews }}<br>
-    Rating: {{ result.reva_rating }}
-{% endfor %}
+
+<div class="container-fluid">
+  <div class="row" id="search-results">
+    {% for result in results %}
+      <div class="col-md-6">
+        <h3><a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a></h3>
+        {{ result.formatted_address }}<br>
+        Reviews: {{ result.count_reviews }}<br>
+        Rating: {{ result.reva_rating }}
+      </div>
+    {% endfor %}
+  </div>
+</div>
 
 {% if next_page %}
-<div>
-    <a href="/restaurant-search/page/{{ next_page }}">Next Page</a>
-</div>
+<button type="button" id="more-results" class="btn btn-link">More</button>
 {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+    let next_page_token = "{{ next_page }}";
+
+    $("#more-results").on('click', function(){
+        $.get(`/restaurant-search/page/${next_page_token}.json`, function(result){
+            let r = result[0]
+            next_page_token = result[1]
+
+            for (let i = 0; i < r.length; i++) {
+                $("#search-results").append('<div class="col-md-6">' +
+                    `<h3><a href="/restaurant/${r[i].place_id}">${r[i].name}</a></h3>` +
+                    `${r[i].formatted_address}<br>` +
+                    `Reviews: ${r[i].count_reviews}<br>` +
+                    `Rating: ${r.reva_rating}` +
+                    '</div>');
+            }
+
+            if (!(next_page_token)) {
+                $("#more-results").hide();
+            }
+        })
+    })
+    
+</script>
 
 {% endblock %}

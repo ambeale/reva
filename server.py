@@ -196,20 +196,14 @@ def return_key_for_geocoding():
 
 ### RESTAURANT ROUTES ###
 
-@app.route('/restaurant-search/', defaults={'page': 1})
-@app.route('/restaurant-search/page/<page>')
-def display_restaurant_results(page):
-    """Call Google API with given search terms and return restaurants"""
+@app.route('/restaurant-search/') 
+def display_restaurant_results():
+    """Call Google API with submitted search terms;
+    Render template with restaurants returned by API"""
 
-    # If initial page of results, call Google Places API with search terms
-    if page == 1:
-        search_term = request.args.get('search-restaurant')
-        location = request.args.get('restaurant-location')
-        response = restaurant_search_api_call(search_term, location)
-    
-    # Else call Google Places API with next_page token
-    else:
-        response = additional_results_api_call(page)
+    search_term = request.args.get('search-restaurant')
+    location = request.args.get('restaurant-location')
+    response = restaurant_search_api_call(search_term, location)
     
     # Save any additional results (Google limits first page to 20 results)
     next_page_token = response.get('next_page_token', None)
@@ -222,6 +216,24 @@ def display_restaurant_results(page):
     return render_template("restaurant_search_results.html",
                            results=full_results,
                            next_page=next_page_token)
+
+
+@app.route('/restaurant-search/page/<page>.json')
+def return_additional_results(page):
+    """Call Google Places API with next_page_token;
+    Return jsonified restaurants and next next_page_token"""
+
+    response = additional_results_api_call(page)
+    
+    # Save any additional results (Google limits first page to 20 results)
+    next_page_token = response.get('next_page_token', None)
+
+    # For each restaurant returned by API, add reviews + rating from db
+    results_w_count = add_rest_review_count_json(response['results'])
+    full_results = add_rest_ratings_json(results_w_count)
+
+    # Complete AJAX call by returning results and next token
+    return jsonify([full_results, next_page_token])
 
 
 @app.route('/restaurant/<place_id>')
