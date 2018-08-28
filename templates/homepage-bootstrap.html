@@ -16,8 +16,15 @@
   </head>
 
   <body class="text-center">
-
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+      {% for message in get_flashed_messages() %}
+          <div class="alert alert-warning" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
       <header class="masthead mb-auto">
         <div class="inner">
           <h3 class="masthead-brand">reva</h3>
@@ -36,6 +43,7 @@
       </header>
 
       <main role="main" class="inner cover">
+
         <h1 class="cover-heading">Discover your next favorite.</h1>
         <p class="lead">reva is a collection of restaurant reviews from your friends and neighbors. Start the search for your newest favorite below.</p>
         <div class="row">

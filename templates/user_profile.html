@@ -10,6 +10,13 @@
 </p>
 {% endfor %}
 
+<h4>Preferences:</h4>
+<p>
+Food weighting: {{ user.food_weighting }} <br>
+Service weighting: {{ user.service_weighting }} <br>
+Price weighting: {{ user.price_weighting }}
+</p>
+
 
 <h4>Reviews:</h4>
 
@@ -23,5 +30,9 @@
         Price score: {{ review.price_score }} <br>
     </p>
 {% endfor %}
+
+{% if not user.reviews %}
+<h5>No reviews written</h5>
+{% endif %}
 
 {% endblock %}

@@ -28,6 +28,11 @@ class User(db.Model):
     password = db.Column(db.String(64), nullable=False)
     zipcode = db.Column(db.String(15), nullable=True)
     icon = db.Column(db.String(300), nullable=False, default=default_icon)
+    
+    # Preferences on how to weight overall rating score
+    food_weighting = db.Column(db.Float(), nullable=False, default=0.7)
+    service_weighting = db.Column(db.Float(), nullable=False, default=0.15)
+    price_weighting = db.Column(db.Float(), nullable=False, default=0.15)
 
     def __repr__(self):
         """Provide helpful representation when printed"""

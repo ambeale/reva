@@ -245,7 +245,8 @@ def display_restaurant(place_id):
     # If restaurant in database, query and pass to template
     if restaurant:
         restaurant.count_reviews = len(restaurant.reviews)
-        restaurant.reva_rating = calculate_overall_rating(restaurant.reviews)
+        restaurant.reva_rating = calculate_overall_rating(restaurant.reviews,
+                                                session.get("user_id", None))
         return render_template("restaurant_details.html",
                                 restaurant=restaurant,
                                 api_key=os.environ['GOOGLE_API_KEY'])
@@ -629,21 +630,22 @@ def add_rest_ratings_json(results):
 
             # Only calculate if query returns reviews
             if review_scores:
-                restaurant_rating = calculate_overall_rating(review_scores)
+                restaurant_rating = calculate_overall_rating(review_scores,
+                                                session.get("user_id", None))
                 results[index]['reva_rating'] = restaurant_rating
 
     return results
 
 
-def calculate_overall_rating(reviews):
+def calculate_overall_rating(reviews, user_id):
     """Given list of Review objects, use algorithm to return overall rating
 
     >>> test = Restaurant(restaurant_id="test")
     >>> test.ratings = [Review(food_score=4, service_score=5, price_score=5),
     ...                 Review(food_score=3, service_score=4, price_score=5),
     ...                 Review(food_score=2, service_score=3, price_score=5)]
-    >>> calculate_overall_rating(test.ratings)
-    3.65
+    >>> calculate_overall_rating(test.ratings, None)
+    3.45
 
     """
 
@@ -654,9 +656,23 @@ def calculate_overall_rating(reviews):
     # Get score averages
     food_avg, service_avg, price_avg = calculate_individual_ratings(reviews)    
 
-    # Calculate overall average using proprietary algorithm
-    overall_avg = round((food_avg * 0.55) + (service_avg * 0.3)
-                                         + (price_avg * 0.15), 2)
+    # Set default score weightings
+    food_weight = 0.7
+    service_weight= 0.15
+    price_weight = 0.15
+
+    # Update score weightings if user is logged in
+    if user_id:
+        user_preferences = db.session.query(User.food_weighting,
+                                            User.service_weighting,
+                                            User.price_weighting).filter(
+                                            User.user_id==session["user_id"]
+                                            ).first()
+        food_weight, service_weight, price_weight = user_preferences
+    
+    # Calculate weighted average
+    overall_avg = round((food_avg * food_weight) + (service_avg * service_weight)
+                                                 + (price_avg * price_weight), 2)
 
     return overall_avg
 

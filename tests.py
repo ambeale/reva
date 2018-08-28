@@ -25,7 +25,7 @@ class RouteTestsLoggedOut(unittest.TestCase):
 
     def test_login_form(self):
         result = self.client.get('/login-form')
-        self.assertIn(b'<h2>User Login</h2>',
+        self.assertIn(b'Sign In</h1>',
                         result.data)
 
 
@@ -108,7 +108,7 @@ class RouteTestsLoggedIn(unittest.TestCase):
     
     def test_login_form(self):
         result = self.client.get('/login-form')
-        self.assertNotIn(b'<h2>User Login</h2>',
+        self.assertNotIn(b'Sign In</h1>',
                         result.data)
 
     def test_logout(self):
@@ -131,7 +131,7 @@ class ServerTests(unittest.TestCase):
 
     def test_index(self):
         result = self.client.get('/')
-        self.assertIn(b'<h2>Welcome to the Review App (RevA)!</h2>',
+        self.assertIn(b'Discover your next favorite.',
                         result.data)
 
     def test_new_account_form(self):
