@@ -197,7 +197,7 @@ def return_key_for_geocoding():
 ### RESTAURANT ROUTES ###
 
 @app.route('/restaurant-search/') 
-def display_restaurant_results():
+def display_restaurant_search_results():
     """Call Google API with submitted search terms;
     Render template with restaurants returned by API"""
 
