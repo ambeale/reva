@@ -18,8 +18,7 @@ class User(db.Model):
 
     __tablename__ = "users"
 
-    default_icon = """https://images.unsplash.com/photo-1491273289208-
-                      9340cb42e5d9?crop=entropy&fm=jpg&w=150&h=150&fit=crop"""
+    default_icon = """https://images.unsplash.com/photo-1491273289208-9340cb42e5d9?crop=entropy&fm=jpg&w=150&h=150&fit=crop"""
 
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     email = db.Column(db.String(64), nullable=False)

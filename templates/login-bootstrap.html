@@ -18,13 +18,13 @@
 
 
   <body>
-    {% for message in get_flashed_messages() %}
+    <form class="form-signin" action='/login' method="POST">
+      <div class="text-center mb-4">
+        {% for message in get_flashed_messages() %}
         <div class="alert alert-warning" role="alert">
           {{ message }}
         </div>
     {% endfor %}
-    <form class="form-signin" action='/login' method="POST">
-      <div class="text-center mb-4">
         <img class="mb-4" src="https://d29fhpw069ctt2.cloudfront.net/icon/image/59532/preview.svg" alt="" width="100" height="100">
         <h1 class="h3 mb-3 font-weight-normal">Sign In</h1>
         <p>Log in to your account below:</p>

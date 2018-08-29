@@ -8,16 +8,14 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from datetime import datetime
 
-from sqlalchemy import func
+from sqlalchemy import func, update
 
 from werkzeug import secure_filename
 
-from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
-                    Favorite, Photo, connect_to_db, db)
 import os, requests, json
 
-UPLOAD_FOLDER = '/static/photo-uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
+                    Favorite, Photo, connect_to_db, db)
 
 app = Flask(__name__)
 
@@ -120,21 +118,6 @@ def create_new_user():
         flash("You've been added!")
 
     return redirect('/login-form')
-
-
-@app.route('/profile')
-def display_user_profile_page():
-    """Render user's profile page"""
-
-    user = session.get("user_id")
-
-    if not user:
-        flash("Please log in to view this page")
-        return redirect('/login-form')
-
-    user_info = User.query.filter_by(user_id=user).first()
-
-    return render_template("user_profile.html", user=user_info)
 
 
 ### FAVORITING ROUTES ###
@@ -395,7 +378,88 @@ def add_review():
     return jsonify(restaurant_id)
 
 
-######### USER SEARCH ROUTES ###########
+######### USER ROUTES ###########
+
+@app.route('/profile')
+def display_user_profile_page():
+    """Render user's profile page"""
+
+    user = session.get("user_id")
+
+    if not user:
+        flash("Please log in to view this page")
+        return redirect('/login-form')
+
+    user_info = User.query.filter_by(user_id=user).first()
+
+    return render_template("user_profile.html", user=user_info)
+
+
+@app.route('/preferences')
+def display_user_preferences():
+    """Render page of user preferences"""
+
+    user = session.get("user_id")
+
+    if not user:
+        flash("Please log in to view this page")
+        return redirect('/login-form')
+
+    user_info = User.query.filter_by(user_id=user).first()
+
+    return render_template("user_preferences.html", user=user_info)
+
+
+@app.route('/update-weightings', methods=["POST"])
+def update_weighting_preferences():
+    """Update score weighting preferences for user"""
+
+    user_id = session.get("user_id")
+    food_weight = float(request.form.get("food-weight")) / 100
+    service_weight = float(request.form.get("service-weight")) / 100
+    price_weight = float(request.form.get("price-weight"))/ 100
+
+    if not user_id:
+        flash("You must be logged in to update preferences")
+        return redirect("/login-form")
+
+    user = User.query.filter_by(user_id=user_id).first()
+
+    if food_weight + service_weight + price_weight == 1.0:
+        user.food_weighting = food_weight
+        user.service_weighting = service_weight
+        user.price_weighting = price_weight
+        db.session.commit()
+        flash("User preferences updated")
+    else:
+        flash("Score weights must add to 100.")
+
+    return redirect('/preferences')
+
+
+@app.route('/update-icon', methods=["POST"])
+def update_icon():
+    """Update icon associated with user"""
+
+    new_icon = request.files.get("icon")
+    user_id = session.get("user_id")
+
+    if not user_id:
+        flash("You must be logged in to update preferences")
+        return redirect("/login-form")
+
+    user = User.query.filter_by(user_id=user_id).first()
+
+    # Add user_id to photo name to avoid cross-user duplicates
+    filename = "userid{}_".format(user_id) + secure_filename(new_icon.filename)
+    new_icon.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    
+    user.icon = "/static/photo-uploads/" + filename
+    db.session.commit()
+    flash("User preferences updated")
+
+    return redirect('/preferences')
+
 
 @app.route("/user-search")
 def search_users():

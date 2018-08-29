@@ -79,20 +79,53 @@
     <input type="submit" value="Search">
 </form>
 
-<div class="container-fluid">
+<!-- <div class="container-fluid">
   <div class="row">
     {% for review in restaurant.reviews %}
       <div class="col-md-4">
-        <h4>Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br></h4>
-        <p>
-          Food score: {{ review.food_score }} <br>
-          Comment: {{ review.food_comment }} <br>
-          Service score: {{ review.service_score }} <br>
-          Comment: {{ review.service_comment }} <br>
-          Price score: {{ review.price_score }} <br>
-          Comment: {{ review.price_comment }} <br>
-        </p>
+        <div class="card">
+          <div class="card-body">
+            <h4>Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br></h4>
+            <p>
+              Food score: {{ review.food_score }} <br>
+              Comment: {{ review.food_comment }} <br>
+              Service score: {{ review.service_score }} <br>
+              Comment: {{ review.service_comment }} <br>
+              Price score: {{ review.price_score }} <br>
+              Comment: {{ review.price_comment }} <br>
+            </p>
+          </div>
+        </div>
       </div>
+    {% endfor %}
+  </div>
+</div> -->
+
+<div class="container-fluid">
+  <div class="card-columns">
+    {% for review in restaurant.reviews %}
+      <div class="card">
+        <div class="card-header">
+          <img src="{{ review.user.icon }}" height="40">
+          <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a></div>
+        <div class="card-body">
+            <h5 class="card-title">Food</h5>
+            <p class="card-text">
+              Score: {{ review.food_score }} <br>
+              Comment: {{ review.food_comment }} 
+            </p>
+            <h5 class="card-title">Service</h5>
+            <p class="card-text">  
+              Score: {{ review.service_score }} <br>
+              Comment: {{ review.service_comment }}
+            </p>
+            <h5 class="card-title">Price</h5>
+            <p class="card-text"> 
+              Score: {{ review.price_score }} <br>
+              Comment: {{ review.price_comment }}
+            </p>
+          </div>
+        </div>
     {% endfor %}
   </div>
 </div>

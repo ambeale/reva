@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Update Preferences</h1>
+<br>
+<h3>Score weighting:</h3>
+<p>
+<form action="/update-weightings" method="POST">
+  <div class="row">
+    <div class="col-md-4">
+        Food: <input type="text" name="food-weight" value="{{ user.food_weighting * 100 }}" required> %
+    </div>
+    <div class="col-md-4">
+        Service: <input type="text" name="service-weight" value="{{ user.service_weighting * 100 }}" required> %
+    </div>
+    <div class="col-md-4">
+        Price: <input type="text" name="price-weight" value="{{ user.price_weighting * 100 }}" required> %
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-md-12 text-center">
+        <input type="submit" class="btn btn-lg btn-secondary align-center" value="Update">
+    </div>
+  </div>
+</form></p>
+
+<br>
+<h3>Profile image:</h3>
+<form action="/update-icon" id="review-form" enctype=multipart/form-data method="POST">
+    <div class="row">
+        <div class="col-md-6 text-right">
+            <img src="{{ user.icon }}">
+        </div>
+        <div class="col-md-6 custom-file">
+            <input type="file" name="icon" id="validatedCustomFile" accept="image/*" required>
+        </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-md-12 text-center">
+        <input type="submit" class="btn btn-lg btn-secondary align-center" value="Update">
+    </div>
+  </div>
+</form>
+
+
+{% endblock %}
