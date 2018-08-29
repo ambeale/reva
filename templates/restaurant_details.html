@@ -10,23 +10,30 @@
           padding: 3px;
           margin: 1px;
           color: white;
-        }
+      }
       #rating-label {
           font: 13px sans-serif;
           line-height: 19px;
           margin-left: 15px;
-        }
+      }
       .inline-block-paragraph {
           display: inline-block;
           width: 50px;
           height: 75px;
           font: 10px sans-serif;
           vertical-align: top;
-    }
-      .jumbotron {
-        margin-top: 30px;
+      }
+      #center-jumbo {
+        margin-top: 20px;
         padding-top: 30px !important; 
         padding-bottom: 30px !important;
+      }
+      .vertical-align {
+        display: flex;
+        align-items: center;
+      }
+      .fa-star {
+        color: #fdbf13;
       }
     </style>
 </head>
@@ -34,8 +41,26 @@
 {% extends 'base.html' %}
 {% block content %}
 <main role="main">
-  <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span></h2>
-  <div class="jumbotron">
+  <div class="container-fluid">
+    <div class="row vertical-align">
+      <div class="col-sm-10">
+        <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span>
+        </h2>
+      </div>
+      <div class="col-sm-2 text-right">
+          {% if session.get("user_id") %}
+          <form action="/review-form">
+              <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
+              <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
+              <button type="submit" class="btn btn-lg btn-outline-dark">Add a review</button>
+          </form>
+        {% endif %}
+     </div>
+</div>
+</div>
+  
+  </h2>
+  <div class="jumbotron" id="center-jumbo">
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-1"></div>
@@ -54,52 +79,25 @@
           </div>
           <div id="rating-chart" class="inline-block-paragraph" restaurant="{{ restaurant.restaurant_id }}"></div>
         </div>
+        <div class="col-md-1"></div>
         <div class="col-md-4">
           <div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
         </div>
+        <div class="col-md-2"></div>
     </div>
   </div>
 </div>
 
 
-<h3>Reviews</h3>
-
-{% if session.get("user_id") %}
-<form action="/review-form">
-    <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
-    <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
-    <input type="submit" value="Add a rating">
-</form>
-{% endif %}
+<h1>Reviews</h1>
 
 <form action="/restaurant-dish-search">
-    Search for a dish:
+    <p class="lead">Search for a dish:
     <input type="text" name="dish-search">
     <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
-    <input type="submit" value="Search">
+    <button type="submit" class="btn btn-outline-dark">Search</button>
+    </p>
 </form>
-
-<!-- <div class="container-fluid">
-  <div class="row">
-    {% for review in restaurant.reviews %}
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <h4>Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a><br></h4>
-            <p>
-              Food score: {{ review.food_score }} <br>
-              Comment: {{ review.food_comment }} <br>
-              Service score: {{ review.service_score }} <br>
-              Comment: {{ review.service_comment }} <br>
-              Price score: {{ review.price_score }} <br>
-              Comment: {{ review.price_comment }} <br>
-            </p>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-</div> -->
 
 <div class="container-fluid">
   <div class="card-columns">
@@ -107,22 +105,32 @@
       <div class="card">
         <div class="card-header">
           <img src="{{ review.user.icon }}" height="40">
-          <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a></div>
+          <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a>
+        </div>
         <div class="card-body">
-            <h5 class="card-title">Food</h5>
+            <h5 class="card-title">Food
+              {% for n in range(review.food_score) %}
+                <i class="fas fa-star"></i>
+              {% endfor %}
+            </h5>
             <p class="card-text">
-              Score: {{ review.food_score }} <br>
-              Comment: {{ review.food_comment }} 
+              {{ review.food_comment }} 
             </p>
-            <h5 class="card-title">Service</h5>
+            <h5 class="card-title">Service
+              {% for n in range(review.service_score) %}
+                <i class="fas fa-star"></i>
+              {% endfor %}
+            </h5>
             <p class="card-text">  
-              Score: {{ review.service_score }} <br>
-              Comment: {{ review.service_comment }}
+              {{ review.service_comment }}
             </p>
-            <h5 class="card-title">Price</h5>
+            <h5 class="card-title">Price
+              {% for n in range(review.price_score) %}
+                <i class="fas fa-star"></i>
+              {% endfor %}
+            </h5>
             <p class="card-text"> 
-              Score: {{ review.price_score }} <br>
-              Comment: {{ review.price_comment }}
+              {{ review.price_comment }}
             </p>
           </div>
         </div>

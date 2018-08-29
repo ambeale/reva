@@ -26,6 +26,7 @@ def load_users():
             row = row.rstrip()
             user_id, email, fname, lname, password, zipcode = row.split("|")
             
+            # Hash password using bcrypt
             salt = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
             

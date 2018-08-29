@@ -12,7 +12,7 @@ from sqlalchemy import func, update
 
 from werkzeug import secure_filename
 
-import os, requests, json, bcrypt
+import os, requests, json, bcrypt, boto3, botocore
 
 from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
                     Favorite, Photo, connect_to_db, db)
@@ -54,21 +54,19 @@ def user_login():
     user_email = request.form.get("email")
     password = request.form.get("password")
 
-    user_obj = User.query.filter_by(email=user_email).first()
+    user = User.query.filter_by(email=user_email).first()
 
-    # If user not in db, flash "user not found"
-    if user_obj is None:
+    if user is None:
         flash("No user found with that email")
         return redirect('/login-form')
 
-    # If username and password match db, save user_id and name to session
-    elif bcrypt.checkpw(password.encode('utf-8'), user_obj.password.encode('utf-8')):
-        session['user_id'] = user_obj.user_id
-        session['fname'] = user_obj.fname
+    # If username and hashed password match db, save user_id and name to session
+    elif bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        session['user_id'] = user.user_id
+        session['fname'] = user.fname
         flash("Successfully logged in")
         return redirect("/")
 
-    # If user found, but password wrong, flash "wrong password"
     else:
         flash("Password incorrect")
         return redirect("/login-form")
@@ -110,9 +108,14 @@ def create_new_user():
     if email_match:
         flash('Account for this email already created')
     else:
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        # Hash password using bcrypt
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+        
+        # Add user to db
         new_user = User(email=new_email, fname=fname, lname=lname,
-                        password=hashed_password.decode('utf-8'), zipcode=zipcode)
+                        password=hashed_password.decode('utf-8'),
+                        zipcode=zipcode)
         db.session.add(new_user)
         db.session.commit()
 
@@ -343,33 +346,35 @@ def add_review():
         return jsonify(restaurant_id)
 
     # Else create new review
-    else:
-        food_score = request.form.get("food-score")
-        food_comment = request.form.get("food-comment")
-        service_score = request.form.get("service-score")
-        service_comment = request.form.get("service-comment")
-        price_score = request.form.get("price-score")
-        price_comment = request.form.get("price-comment")
-        dish_names = json.loads(request.form.get("dishes"))
-        uploaded_files = request.files.getlist("file")
+    food_score = request.form.get("food-score")
+    food_comment = request.form.get("food-comment")
+    service_score = request.form.get("service-score")
+    service_comment = request.form.get("service-comment")
+    price_score = request.form.get("price-score")
+    price_comment = request.form.get("price-comment")
+    dish_names = json.loads(request.form.get("dishes"))
+    uploaded_files = request.files.getlist("file")
 
-        new_review = Review(user_id=user_id,
-                            restaurant_id=restaurant_id,
-                            food_score=food_score,
-                            food_comment=food_comment,
-                            service_score=service_score,
-                            service_comment=service_comment,
-                            price_score=price_score,
-                            price_comment=price_comment)
-        db.session.add(new_review)
-        
-        # Need to commit to access assigned review_id
-        db.session.commit()
-        flash("Review successfully added")
+    new_review = Review(user_id=user_id,
+                        restaurant_id=restaurant_id,
+                        food_score=food_score,
+                        food_comment=food_comment,
+                        service_score=service_score,
+                        service_comment=service_comment,
+                        price_score=price_score,
+                        price_comment=price_comment)
+    db.session.add(new_review)
+    
+    # Need to commit to access assigned review_id
+    db.session.commit()
+    flash("Review successfully added")
     
     # If review contains photos, add photos to db
-    if uploaded_files:
-        add_photos_to_db(uploaded_files, new_review, user_id)
+    for file in uploaded_files:
+        s3_url = add_photo_to_s3(file, user_id)
+        photo = Photo(review_id=new_review.review_id, url=s3_url)
+        db.session.add(photo)
+        db.session.commit()
 
     # If review contains dishes, add dishes to db 
     if dish_names:
@@ -451,11 +456,8 @@ def update_icon():
 
     user = User.query.filter_by(user_id=user_id).first()
 
-    # Add user_id to photo name to avoid cross-user duplicates
-    filename = "userid{}_".format(user_id) + secure_filename(new_icon.filename)
-    new_icon.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    
-    user.icon = "/static/photo-uploads/" + filename
+    # Upload photo to S3 and update icon to new url
+    user.icon = add_photo_to_s3(new_icon, user_id)
     db.session.commit()
     flash("User preferences updated")
 
@@ -558,22 +560,31 @@ def return_matching_dishes():
 
 ####### HELPER FUNCTIONS #######
 
-def add_photos_to_db(uploaded_files, new_review, user_id):
-    """Add photos to Photo table"""
+def add_photo_to_s3(file, user_id):
+    """Upload given photo to Amazon S3 and return URL"""
 
-    for file in uploaded_files:
-        # Add user_id to photo name to avoid cross-user duplicates
-        filename = "userid{}_".format(user_id) + secure_filename(file.filename)
-        
-        # Save file to local folder using Flask
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        
-        # Save url of photo to db
-        photo = Photo(review_id=new_review.review_id,
-                      url="/static/photo-uploads/" + filename)
-        db.session.add(photo)
+    s3 = boto3.client("s3", aws_access_key_id=os.environ["S3_KEY"],
+                       aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"])
+    s3_location = 'http://{}.s3.amazonaws.com/'.format(os.environ["S3_BUCKET"])
 
-    db.session.commit()
+    # Add user_id to photo name to avoid cross-user duplicates
+    filename = "userid{}_".format(user_id) + secure_filename(file.filename)
+
+    try:
+        s3.upload_fileobj(
+            file,
+            os.environ["S3_BUCKET"],
+            filename,
+            ExtraArgs={
+                "ACL": "public-read",
+                "ContentType": file.content_type
+        })
+
+    except Exception as e:
+        print("Something Happened: ", e)
+        return e
+
+    return "{}{}".format(s3_location, filename)
 
 
 def add_dishes_to_db(dish_names, new_review, restaurant_id):

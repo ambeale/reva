@@ -1,17 +1,56 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>{{ user.fname }} {{ user.lname }}</h2>
+<div class="jumbotron">
+    <div class="row">
+        <div class="col-md-2 text-right">
+            <img src="{{ user.icon }}" height="200">
+        </div>
+        <div class="col-md-10">
+            <h2>{{ user.fname }} {{ user.lname }}</h2>
+            Zipcode: {{ user.zipcode }} <br>
+            Reviews: {{ user.reviews | length }}<br>
+            Favorites:
+            <ul>
+            {% for favorite in user.favorites %}
+                <li><a href="/restaurant/{{ favorite.restaurant.restaurant_id }}">{{ favorite.restaurant.name }}</a></li>
+            {% endfor %}
+            {% if not user.favorites %}
+               <li> None</li>
+            {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
 
-{% for review in user.reviews %}
-    <p>
-        Restaurant:
-        <a href="/restaurant/{{ review.restaurant_id }}">
-            {{ review.restaurant.name }}</a><br>
-        Food score: {{ review.food_score }} <br>
-        Service score: {{ review.service_score }} <br>
-        Price score: {{ review.price_score }} <br>
-    </p>
+<div class="container-fluid">
+  <div class="card-columns">
+    {% for review in user.reviews %}
+      <div class="card">
+        <div class="card-header">
+          <a href="/restaurant/{{ review.restaurant_id }}">
+                {{ review.restaurant.name }}</a>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Food</h5>
+                <p class="card-text">
+                  Score: {{ review.food_score }} <br>
+                  Comment: {{ review.food_comment }} 
+                </p>
+            <h5 class="card-title">Service</h5>
+                <p class="card-text">  
+                  Score: {{ review.service_score }} <br>
+                  Comment: {{ review.service_comment }}
+                </p>
+            <h5 class="card-title">Price</h5>
+                <p class="card-text"> 
+                  Score: {{ review.price_score }} <br>
+                  Comment: {{ review.price_comment }}
+                </p>
+        </div>
+      </div>
 {% endfor %}
+</div>
+</div>
 
 {% endblock %}
