@@ -1,11 +1,11 @@
 """Utility file to seed review database with data in fake_data/"""
 
 from sqlalchemy import func
+from datetime import datetime
+import bcrypt
 from model import User, Review, Dish, ReviewDish, RestaurantDish
-
 from model import connect_to_db, db
 from server import app
-from datetime import datetime
 
 
 # IMPORTANT: Be sure to run psql [db_name] < fake_data/restaurants.pg 
@@ -25,12 +25,15 @@ def load_users():
         for row in text:
             row = row.rstrip()
             user_id, email, fname, lname, password, zipcode = row.split("|")
-
+            
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+            
             user = User(user_id=user_id,
                         email=email,
                         fname=fname,
                         lname=lname,
-                        password=password,
+                        password=hashed_password.decode('utf-8'),
                         zipcode=zipcode)
 
             # Add to the session or it won't be stored

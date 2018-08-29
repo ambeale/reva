@@ -12,7 +12,7 @@ from sqlalchemy import func, update
 
 from werkzeug import secure_filename
 
-import os, requests, json
+import os, requests, json, bcrypt
 
 from model import (User, Restaurant, Review, Dish, ReviewDish, RestaurantDish,
                     Favorite, Photo, connect_to_db, db)
@@ -62,7 +62,7 @@ def user_login():
         return redirect('/login-form')
 
     # If username and password match db, save user_id and name to session
-    elif user_obj.password == password:
+    elif bcrypt.checkpw(password.encode('utf-8'), user_obj.password.encode('utf-8')):
         session['user_id'] = user_obj.user_id
         session['fname'] = user_obj.fname
         flash("Successfully logged in")
@@ -110,8 +110,9 @@ def create_new_user():
     if email_match:
         flash('Account for this email already created')
     else:
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         new_user = User(email=new_email, fname=fname, lname=lname,
-                        password=password, zipcode=zipcode)
+                        password=hashed_password.decode('utf-8'), zipcode=zipcode)
         db.session.add(new_user)
         db.session.commit()
 

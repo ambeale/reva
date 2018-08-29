@@ -9,7 +9,7 @@ for n in range(1,11):
     email = fake.email()
     fname = fake.first_name()
     lname = fake.last_name()
-    password = fake.password()
+    password = 'password'
     zipcode = fake.postalcode()
 
     print("""{}|{}|{}|{}|{}|{}""".format(user_id, email, fname, lname,

@@ -24,7 +24,7 @@ class User(db.Model):
     email = db.Column(db.String(64), nullable=False)
     fname = db.Column(db.String(64), nullable=False)
     lname = db.Column(db.String(64), nullable=False)
-    password = db.Column(db.String(64), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
     zipcode = db.Column(db.String(15), nullable=True)
     icon = db.Column(db.String(300), nullable=False, default=default_icon)
     
