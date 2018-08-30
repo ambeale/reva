@@ -35,6 +35,9 @@
       .fa-star {
         color: #fdbf13;
       }
+      #review-photo {
+        padding-top: 5px;
+      }
     </style>
 </head>
 
@@ -132,6 +135,13 @@
             <p class="card-text"> 
               {{ review.price_comment }}
             </p>
+            <div class="row">
+            {% for photo in review.photos %}
+                <a href="{{ photo.url }}" data-toggle="lightbox" data-max-height="400" data-gallery="example-gallery" class="col-sm-4 text-center">
+                  <img src="{{ photo.url }}" height="80" id="review-photo">
+                </a>
+            {% endfor %}
+            </div>
           </div>
         </div>
     {% endfor %}
@@ -150,5 +160,14 @@
 <script src="/static/js/rating_graph.js"></script>
 <script src="http://unpkg.com/babel-standalone"></script>
 <script src="/static/js/favorite.jsx" type="text/jsx"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<script type="text/javascript">
+  $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+                event.preventDefault();
+                $(this).ekkoLightbox();
+            });
+</script>
+
 
 {% endblock %}
