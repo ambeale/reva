@@ -45,7 +45,7 @@ class Restaurant(db.Model):
     __tablename__ = "restaurants"
 
     restaurant_id = db.Column(db.String(200), primary_key=True)
-    name = db.Column(db.String(200), nullable=True) # change to False
+    name = db.Column(db.String(200), nullable=False)
     phone_number = db.Column(db.String(20), nullable=True)
     address = db.Column(db.String(200), nullable=True)
     website = db.Column(db.String(200), nullable=True)
@@ -65,9 +65,12 @@ class Favorite(db.Model):
     __tablename__ = "favorites"
 
     favorite_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    restaurant_id = db.Column(db.String(200), db.ForeignKey(
-                                                'restaurants.restaurant_id'))
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False)
+    restaurant_id = db.Column(db.String(200),
+                              db.ForeignKey('restaurants.restaurant_id'),
+                              nullable=False)
 
     # Relationships
     restaurant = db.relationship("Restaurant", backref=db.backref("favorites"))

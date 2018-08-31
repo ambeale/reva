@@ -398,7 +398,7 @@ def display_user_profile_page():
 
     user_info = User.query.filter_by(user_id=user).first()
 
-    return render_template("user_profile.html", user=user_info)
+    return render_template("user_details.html", user=user_info)
 
 
 @app.route('/preferences')
@@ -792,14 +792,33 @@ def calculate_user_review_count(user_list):
 def example_data():
     """Create some sample user data."""
 
+    Favorite.query.delete()
     User.query.delete()
+    Restaurant.query.delete()
+
+    # Hash password using bcrypt
+    salt = bcrypt.gensalt()
+    hashed_pw_jane = bcrypt.hashpw(b"hellojane", salt)
+    hashed_pw_jack = bcrypt.hashpw(b"hellojack", salt)
 
     jane = User(user_id=1, email='jane@gmail.com', fname='Jane', lname='Doe',
-                password='hellojane')
+                password=hashed_pw_jane.decode('utf-8'))
     jack = User(user_id=2, email='jack@gmail.com', fname='Jack', lname='Dee',
-                password='hellojack')
+                password=hashed_pw_jack.decode('utf-8'))
 
-    db.session.add_all([jane, jack])
+    restaurant = Restaurant(restaurant_id='ChIJNZloNTd-j4ARxGMOXZp7KfI',
+                            name='Farmhouse Kitchen')
+
+    db.session.add_all([jane, jack, restaurant])
+    db.session.commit()
+
+    # Get the Max user_id in the database
+    result = db.session.query(func.max(User.user_id)).one()
+    max_id = int(result[0])
+
+    # Set the value for the next user_id to be max_id + 1
+    query = "SELECT setval('users_user_id_seq', :new_id)"
+    db.session.execute(query, {'new_id': max_id + 1})
     db.session.commit()
 
 
@@ -816,6 +835,6 @@ if __name__ == "__main__":
     DebugToolbarExtension(app)
 
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-    app.config['UPLOAD_FOLDER'] = './static/photo-uploads'
+    # app.config['UPLOAD_FOLDER'] = './static/photo-uploads'
 
     app.run(port=5000, host='0.0.0.0')

@@ -24,9 +24,9 @@
           vertical-align: top;
       }
       #center-jumbo {
-        margin-top: 20px;
-        padding-top: 30px !important; 
-        padding-bottom: 30px !important;
+        /*margin-top: 20px;*/
+        padding-top: 30px; 
+        padding-bottom: 30px;
       }
       .vertical-align {
         display: flex;
@@ -50,7 +50,7 @@
         <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span>
         </h2>
       </div>
-      <div class="col-sm-2 text-right">
+      <div class="col-sm-2 text-center">
           {% if session.get("user_id") %}
           <form action="/review-form">
               <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">

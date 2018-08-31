@@ -122,6 +122,35 @@ class RouteTestsLoggedIn(unittest.TestCase):
                       result.data)
 
 
+    def test_add_favorite(self):
+        add_fav = self.client.post('/update-favorite',
+                                  data={'restaurant_id':
+                                        'ChIJNZloNTd-j4ARxGMOXZp7KfI'},
+                                  follow_redirects=True)
+
+        self.assertIn(b'Favorite added', add_fav.data)
+
+        is_fav = self.client.get('/is-favorite',
+                                  query_string={'user_id': '1', 'restaurant': 
+                                        'ChIJNZloNTd-j4ARxGMOXZp7KfI'})
+
+        self.assertIn(b'true', is_fav.data)
+
+        remove_fav = self.client.post('/update-favorite',
+                                  data={'restaurant_id':
+                                        'ChIJNZloNTd-j4ARxGMOXZp7KfI'},
+                                  follow_redirects=True)
+
+        self.assertIn(b'Favorite removed', remove_fav.data)
+
+        not_fav = self.client.get('/is-favorite',
+                                  query_string={'user_id': '1', 'restaurant': 
+                                        'ChIJNZloNTd-j4ARxGMOXZp7KfI'})
+
+        self.assertIn(b'false', not_fav.data)
+
+
+
 class ServerTests(unittest.TestCase):
 
     def setUp(self):
@@ -138,6 +167,8 @@ class ServerTests(unittest.TestCase):
         result = self.client.get('/new-account-form')
         self.assertIn(b'<h2>Create account</h2>',
                         result.data)
+
+
 
 if __name__ == '__main__':
     unittest.main()

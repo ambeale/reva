@@ -57,18 +57,6 @@
       </div>
     </nav>
 
-<!--     <a href="/">Food Reviews</a> |
-
-    {% if session.get("user_id") %}
-        <a href="/logout" method="POST">Log Out</a> 
-    {% else %}
-        <a href="/login-form">Log In / Create Account</a>
-    {% endif %} 
-    {% if session.get("user_id") %}
-        | <a href="/profile">{{ session.get("fname") }}'s Profile</a>
-    {% endif %}
-    <hr> -->
-
     {% for message in get_flashed_messages() %}
       <div class="alert alert-warning" role="alert">
         {{ message }}
