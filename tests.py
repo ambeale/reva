@@ -86,6 +86,22 @@ class RouteTestsLoggedOut(unittest.TestCase):
         self.assertIn(b'Please log in to view this page',
                       result.data)
 
+    def test_update_weightings(self):
+        result = self.client.post('/update-weightings',
+                                   data={'food-weight': 50,
+                                         'service-weight': 25,
+                                         'price-weight': 25},
+                                   follow_redirects=True)
+        self.assertIn(b'You must be logged in to update preferences',
+                      result.data)
+
+    def test_update_icon(self):
+        result = self.client.post('/update-icon',
+                                   data={'icon': '/fake/url'},
+                                   follow_redirects=True)
+        self.assertIn(b'You must be logged in to update preferences',
+                      result.data)
+
 
 class RouteTestsLoggedIn(unittest.TestCase):
 
@@ -149,6 +165,34 @@ class RouteTestsLoggedIn(unittest.TestCase):
 
         self.assertIn(b'false', not_fav.data)
 
+    def test_update_weightings(self):
+        wrong = self.client.post('/update-weightings',
+                                   data={'food-weight': 80,
+                                         'service-weight': 25,
+                                         'price-weight': 25},
+                                   follow_redirects=True)
+        self.assertIn(b'Score weights must add to 100',
+                      wrong.data)
+
+        correct = self.client.post('/update-weightings',
+                                   data={'food-weight': 50,
+                                         'service-weight': 25,
+                                         'price-weight': 25},
+                                   follow_redirects=True)
+        self.assertIn(b'User preferences updated',
+                      correct.data)
+
+    def test_update_icon(self):
+
+        def _mock_add_photo_to_s3(file, user_id):
+            return "/fake/S3/url/here"
+
+        server.add_photo_to_s3 = _mock_add_photo_to_s3
+
+        result = self.client.post('/update-icon',
+                                   data={'icon': '/fake/url'},
+                                   follow_redirects=True)
+        self.assertIn(b'User preferences updated', result.data)
 
 
 class ServerTests(unittest.TestCase):

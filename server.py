@@ -558,75 +558,7 @@ def return_matching_dishes():
     return jsonify(dishes_list)
 
 
-####### HELPER FUNCTIONS #######
-
-def add_photo_to_s3(file, user_id):
-    """Upload given photo to Amazon S3 and return URL"""
-
-    s3 = boto3.client("s3", aws_access_key_id=os.environ["S3_KEY"],
-                       aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"])
-    s3_location = 'http://{}.s3.amazonaws.com/'.format(os.environ["S3_BUCKET"])
-
-    # Add user_id to photo name to avoid cross-user duplicates
-    filename = "userid{}_".format(user_id) + secure_filename(file.filename)
-
-    try:
-        s3.upload_fileobj(
-            file,
-            os.environ["S3_BUCKET"],
-            filename,
-            ExtraArgs={
-                "ACL": "public-read",
-                "ContentType": file.content_type
-        })
-
-    except Exception as e:
-        print("Something Happened: ", e)
-        return e
-
-    return "{}{}".format(s3_location, filename)
-
-
-def add_dishes_to_db(dish_names, new_review, restaurant_id):
-    """Add dishes to dishes table and middle tables"""
-
-    # If dishes associated => handle each dish tag
-    for dish in dish_names:
-        # If dish_id comes back from JS as a name (not id), it is a new dish
-        try:
-            int(dish['id'])
-        except Exception as e:
-            dish_obj = None
-        else:
-            dish_obj = Dish.query.filter(Dish.dish_id == dish['id']).first()
-        finally:
-            # if dish not in dishes table, add it
-            if not dish_obj:
-                dish_name = dish['name'].capitalize()
-                dish_obj = Dish(name=dish_name)
-                db.session.add(dish_obj)
-                db.session.commit()
-
-            # Deal with middle table - add new review dish
-            new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
-                                         review_id=new_review.review_id)
-            db.session.add(new_review_dish)
-
-            # Deal with association table - 
-            # Check if restaurant and dish are already linked
-            rest_dish_check = RestaurantDish.query.filter_by(
-                                                    dish_id=dish_obj.dish_id,
-                                                    restaurant_id=restaurant_id
-                                                    ).first()
-            
-            # if RestaurantDish not in table, add it
-            if not rest_dish_check:
-                new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
-                                               restaurant_id=restaurant_id)
-                db.session.add(new_rest_dish)
-
-            db.session.commit()
-
+### API Calls ###
 
 def restaurant_search_api_call(term, location):
     """Call Google Places Text Search API using given search terms
@@ -674,6 +606,76 @@ def get_geocoded_lat_lon(location):
     lat_lng = r['results'][0]['geometry']['location']
 
     return lat_lng
+
+
+def add_photo_to_s3(file, user_id):
+    """Upload given photo to Amazon S3 and return URL"""
+
+    s3 = boto3.client("s3", aws_access_key_id=os.environ["S3_KEY"],
+                       aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"])
+    s3_location = 'http://{}.s3.amazonaws.com/'.format(os.environ["S3_BUCKET"])
+
+    # Add user_id to photo name to avoid cross-user duplicates
+    filename = "userid{}_".format(user_id) + secure_filename(file.filename)
+
+    try:
+        s3.upload_fileobj(
+            file,
+            os.environ["S3_BUCKET"],
+            filename,
+            ExtraArgs={
+                "ACL": "public-read",
+                "ContentType": file.content_type
+        })
+
+    except Exception as e:
+        print("Something Happened: ", e)
+        return e
+
+    return "{}{}".format(s3_location, filename)
+
+
+####### HELPER FUNCTIONS #######
+
+def add_dishes_to_db(dish_names, new_review, restaurant_id):
+    """Add dishes to dishes table and middle tables"""
+
+    # If dishes associated => handle each dish tag
+    for dish in dish_names:
+        # If dish_id comes back from JS as a name (not id), it is a new dish
+        try:
+            int(dish['id'])
+        except Exception as e:
+            dish_obj = None
+        else:
+            dish_obj = Dish.query.filter(Dish.dish_id == dish['id']).first()
+        finally:
+            # if dish not in dishes table, add it
+            if not dish_obj:
+                dish_name = dish['name'].capitalize()
+                dish_obj = Dish(name=dish_name)
+                db.session.add(dish_obj)
+                db.session.commit()
+
+            # Deal with middle table - add new review dish
+            new_review_dish = ReviewDish(dish_id=dish_obj.dish_id,
+                                         review_id=new_review.review_id)
+            db.session.add(new_review_dish)
+
+            # Deal with association table - 
+            # Check if restaurant and dish are already linked
+            rest_dish_check = RestaurantDish.query.filter_by(
+                                                    dish_id=dish_obj.dish_id,
+                                                    restaurant_id=restaurant_id
+                                                    ).first()
+            
+            # if RestaurantDish not in table, add it
+            if not rest_dish_check:
+                new_rest_dish = RestaurantDish(dish_id=dish_obj.dish_id,
+                                               restaurant_id=restaurant_id)
+                db.session.add(new_rest_dish)
+
+            db.session.commit()
 
 
 def add_rest_review_count_json(results):

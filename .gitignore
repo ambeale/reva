@@ -3,5 +3,5 @@ env
 *secret*
 .DS_Store
 htmlcov/*
-.coverage
+.coverage*
 static/photo-uploads/*
