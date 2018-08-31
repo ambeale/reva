@@ -1,4 +1,5 @@
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" />
     <style>
       #map {
           height: 35%;
@@ -46,11 +47,11 @@
 <main role="main">
   <div class="container-fluid">
     <div class="row vertical-align">
-      <div class="col-sm-10">
+      <div class="col">
         <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span>
         </h2>
       </div>
-      <div class="col-sm-2 text-center">
+      <div class="col text-center">
           {% if session.get("user_id") %}
           <form action="/review-form">
               <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
@@ -66,8 +67,7 @@
   <div class="jumbotron" id="center-jumbo">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-1"></div>
-        <div class="col-md-4">
+        <div class="col">
           <h3>Details</h3>
           <p>
           Address: {{ restaurant.address }}<br>
@@ -82,8 +82,7 @@
           </div>
           <div id="rating-chart" class="inline-block-paragraph" restaurant="{{ restaurant.restaurant_id }}"></div>
         </div>
-        <div class="col-md-1"></div>
-        <div class="col-md-4">
+        <div class="col">
           <div id="map" lat="{{ restaurant.lat }}" lon="{{ restaurant.lon }}"></div>
         </div>
         <div class="col-md-2"></div>

@@ -10,6 +10,11 @@ let reviewForm = document.querySelector('#review-form');
 reviewForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
 
+    setTimeout(function(){
+     $('#spinnerModal').modal('show');
+    }, 1000);
+    
+
     // Get submitted form data, then add MagicSuggest dish tags
     let form_data = new FormData(reviewForm);
     form_data.append("dishes", JSON.stringify(dishes.getSelection()));
@@ -24,25 +29,6 @@ reviewForm.addEventListener('submit', function (evt) {
             processData: false,
             success: successFunction,
      });
-
-    // Deprecated post request
-    // var formInputs = {
-    //     "user-id": $("#user-id").val(),
-    //     "restaurant-id": $("#restaurant").val(),
-    //     "food-score": $("#food-score").val(),
-    //     "file": "file",
-    //     "food-comment": $("#food-comment").val(),
-    //     "service-score": $("#service-score").val(),
-    //     "service-comment": $("#service-comment").val(),
-    //     "price-score": $("#price-score").val(),
-    //     "price-comment": $("#price-comment").val(),
-    //     "dishes": JSON.stringify(dishes.getSelection())
-    // };
-
-    // $.post("/add-review", 
-    //        formInputs,
-    //        successFunction);
-
 });
 
 function successFunction(results) {

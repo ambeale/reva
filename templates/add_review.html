@@ -1,5 +1,16 @@
 <head>
     <link href="/static/magicsuggest/magicsuggest-min.css" rel="stylesheet">
+    <style type="text/css">
+        .bd-example-modal-lg .modal-dialog{
+            display: table;
+            position: relative;
+            margin: 0 auto;
+            top: calc(50% - 24px);
+        }
+        .fa-spinner {
+            color: #fdbf13;
+        }
+    </style>
 </head>
 
 {% extends 'base.html' %}
@@ -59,6 +70,17 @@
     </div>
         <input type="submit" value="Add review">
     </form>
+
+<div class="modal fade" id="spinnerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <p><i class="fas fa-spinner fa-spin fa-5x"></i></p>
+        <span class="lead text-muted">Adding review</span>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

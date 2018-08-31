@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from datetime import datetime
 
-from sqlalchemy import func, update
+from sqlalchemy import func
 
 from werkzeug import secure_filename
 
@@ -464,7 +464,7 @@ def update_icon():
     return redirect('/preferences')
 
 
-@app.route("/user-search")
+@app.route('/user-search')
 def search_users():
     """Search for users given name and/or email inputs"""
 
@@ -477,13 +477,14 @@ def search_users():
     return render_template("user_search_results.html", results=user_results)
 
 
-@app.route("/user/<user_id>")
+@app.route('/user/<user_id>')
 def display_user_details(user_id):
     """Display details of a user profile"""
 
     user = User.query.filter_by(user_id=user_id).first()
 
     return render_template("user_details.html", user=user)
+
 
 
 ######### DISH ROUTES ##########
