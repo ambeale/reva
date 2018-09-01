@@ -240,37 +240,9 @@ def display_restaurant(place_id):
 
     # If restaurant not in database, trigger Place API request
     else:
-        fields = 'name,formatted_phone_number,formatted_address,geometry,website'
-        payload = {'place_id': place_id,
-                    'fields': fields,
-                    'key': os.environ['GOOGLE_API_KEY']}
-        url = 'https://maps.googleapis.com/maps/api/place/details/json?'
+        new_restaurant = get_place_details(place_id)
 
-        r = requests.get(url, params=payload)
-
-        r = r.json()
-        result = r['result']
-
-        # Details to create Restaurant object
-        name = result['name']
-        phone_number = result.get('formatted_phone_number')
-        address = result.get('formatted_address')
-        website = result.get('website')
-        lat = result['geometry']['location']['lat']
-        lon = result['geometry']['location']['lng']
-
-
-        new_restaurant = Restaurant(restaurant_id=place_id,
-                                    name=name,
-                                    phone_number=phone_number,
-                                    address=address,
-                                    website=website,
-                                    lat=lat,
-                                    lon=lon)
-
-        db.session.add(new_restaurant)
-        db.session.commit()
-
+        # Add default counts to new Restaurant object for display purposes
         new_restaurant.count_reviews = "N/A"
         new_restaurant.reva_rating = "N/A"
 
@@ -507,22 +479,24 @@ def search_dishes():
 def deplay_dish_details(dish_id, location):
     """Display details of chosen dish"""
 
-    query = Dish.query.filter_by(dish_id=dish_id).options(
+    dish = Dish.query.filter_by(dish_id=dish_id).options(
                                             db.joinedload('restaurant_dishes')
                                             ).first()
 
-    rest_dishes = query.restaurant_dishes
-    restaurants = set()
+    matching_restaurants = {}
 
-    for rest_dish in rest_dishes:
+    # Populate set of unique restaurants with a review tagged with chosen dish
+    for rest_dish in dish.restaurant_dishes:
         restaurant = rest_dish.restaurant
-        food_avg, service_avg, price_avg = calculate_individual_ratings(
-                                                            restaurant.reviews)
-        restaurant.food_avg = food_avg
-        restaurants.add(restaurant)
+        avg_score = calculate_overall_rating(restaurant.reviews,
+                                            session.get("user_id"))
+        matching_restaurants[restaurant] = avg_score
 
+    # Order restaurants by rating
+    restaurants = sorted([(v,k) for (k,v) in matching_restaurants.items()])
 
-    return render_template("dish_details.html", dish=query, results=restaurants)
+    return render_template("dish_details.html", dish=dish,
+                            results=restaurants[::-1]) # Reverse sort to highest first
 
 
 @app.route("/dish-reviews/<dish_id>/<restaurant_id>")
@@ -589,6 +563,43 @@ def additional_results_api_call(next_page_token):
     results = requests.get(url, params=payload).json()
 
     return results
+
+
+def get_place_details(place_id):
+    """Use Place Search API to query restaurant and cache details in database"""
+
+    fields = 'name,formatted_phone_number,formatted_address,geometry,website'
+    payload = {'place_id': place_id,
+                'fields': fields,
+                'key': os.environ['GOOGLE_API_KEY']}
+    url = 'https://maps.googleapis.com/maps/api/place/details/json?'
+
+    r = requests.get(url, params=payload)
+
+    r = r.json()
+    result = r['result']
+
+    # Details to create Restaurant object
+    name = result['name']
+    phone_number = result.get('formatted_phone_number')
+    address = result.get('formatted_address')
+    website = result.get('website')
+    lat = result['geometry']['location']['lat']
+    lon = result['geometry']['location']['lng']
+
+
+    new_restaurant = Restaurant(restaurant_id=place_id,
+                                name=name,
+                                phone_number=phone_number,
+                                address=address,
+                                website=website,
+                                lat=lat,
+                                lon=lon)
+
+    db.session.add(new_restaurant)
+    db.session.commit()
+
+    return new_restaurant
 
 
 def get_geocoded_lat_lon(location):

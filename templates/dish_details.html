@@ -5,11 +5,11 @@
 
 {% for result in results %}
     <p>
-        Restaurant name: <a href="/restaurant/{{ result.restaurant_id }}">{{ result.name }}</a>
+        Restaurant name: <a href="/restaurant/{{ result[1].restaurant_id }}">{{ result[1].name }}</a>
         <br>
-        Avg. food rating: {{ result.food_avg }}
+        Rating: {{ result[0]}}
         <br>
-        <form action="/dish-reviews/{{ dish.dish_id }}/{{ result.restaurant_id }}">
+        <form action="/dish-reviews/{{ dish.dish_id }}/{{ result[1].restaurant_id }}">
             <input type="submit" value="Reviews containing {{ dish.name }}">
         </form>
         
