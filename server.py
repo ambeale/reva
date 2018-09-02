@@ -488,9 +488,10 @@ def deplay_dish_details(dish_id, location):
     # Populate set of unique restaurants with a review tagged with chosen dish
     for rest_dish in dish.restaurant_dishes:
         restaurant = rest_dish.restaurant
-        avg_score = calculate_overall_rating(restaurant.reviews,
-                                            session.get("user_id"))
-        matching_restaurants[restaurant] = avg_score
+        if restaurant not in matching_restaurants:
+            avg_score = calculate_overall_rating(restaurant.reviews,
+                                                session.get("user_id"))
+            matching_restaurants[restaurant] = avg_score
 
     # Order restaurants by rating
     restaurants = sorted([(v,k) for (k,v) in matching_restaurants.items()])
