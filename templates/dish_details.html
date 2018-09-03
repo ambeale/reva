@@ -7,7 +7,7 @@
     <p>
         Restaurant name: <a href="/restaurant/{{ result[1].restaurant_id }}">{{ result[1].name }}</a>
         <br>
-        Rating: {{ result[0]}}
+        Rating for tagged reviews: {{ result[0]}}
         <br>
         <form action="/dish-reviews/{{ dish.dish_id }}/{{ result[1].restaurant_id }}">
             <input type="submit" value="Reviews containing {{ dish.name }}">

@@ -225,7 +225,7 @@ def return_additional_results(page):
 
 @app.route('/restaurant/<place_id>')
 def display_restaurant(place_id):
-    """display resturant details and reviews"""
+    """Display restaurant details and reviews"""
 
     restaurant = Restaurant.query.filter_by(restaurant_id=place_id).first()
 
@@ -480,24 +480,34 @@ def deplay_dish_details(dish_id, location):
     """Display details of chosen dish"""
 
     dish = Dish.query.filter_by(dish_id=dish_id).options(
-                                            db.joinedload('restaurant_dishes')
+                                            db.joinedload('review_dishes')
                                             ).first()
 
     matching_restaurants = {}
 
-    # Populate set of unique restaurants with a review tagged with chosen dish
-    for rest_dish in dish.restaurant_dishes:
-        restaurant = rest_dish.restaurant
-        if restaurant not in matching_restaurants:
-            avg_score = calculate_overall_rating(restaurant.reviews,
-                                                session.get("user_id"))
-            matching_restaurants[restaurant] = avg_score
+    # Populate dict with unique restaurants and the reviews associated with searched dish
+    for rev_dish in dish.review_dishes:
+        review = rev_dish.review
+        restaurant = review.restaurant
+        if restaurant in matching_restaurants:
+            matching_restaurants[restaurant].append(review)
+        else:
+            matching_restaurants[restaurant] = [review]
+        
+    restaurant_scores = {}
+    
+    # Given reviews associated with searched dish, populate dict with reva rating
+    for place in matching_restaurants:
+        avg_score = calculate_overall_rating(matching_restaurants[place],
+                                            session.get("user_id"))
+        restaurant_scores[place] = avg_score
 
-    # Order restaurants by rating
-    restaurants = sorted([(v,k) for (k,v) in matching_restaurants.items()])
+    # Order restaurants by rating; use lambda because native sorting throws error
+    restaurants = [(v, k) for (k,v) in restaurant_scores.items()]
+    sorted_restaurants = sorted(restaurants, key=lambda rest_sort: rest_sort[0])
 
     return render_template("dish_details.html", dish=dish,
-                            results=restaurants[::-1]) # Reverse sort to highest first
+                            results=sorted_restaurants[::-1]) # Reverse sort to highest first
 
 
 @app.route("/dish-reviews/<dish_id>/<restaurant_id>")
