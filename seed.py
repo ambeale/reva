@@ -20,6 +20,15 @@ def load_users():
     # we won't be trying to add duplicate users
     User.query.delete()
 
+    url1= "https://images.unsplash.com/photo-"
+    url2 = "?crop=entropy&fm=jpg&w=150&h=150&fit=crop"
+
+    icons = ["1491273289208-9340cb42e5d9", "1520618825575-e632cb001d53",
+             "1525640788966-69bdb028aa73", "1504283708523-52171518259f",
+             "1523986490752-c28064f26be3", "1464347744102-11db6282f854",
+             "1524097676851-f5f2eda28d2c", "1528277787110-35213c499081",
+             "1530071711643-d02e3fad31a2", "1459486358775-edfe3fb98c36"]
+
     # Read user file and insert data
     with open("fake_data/fake_users.txt") as text:
         for row in text:
@@ -35,7 +44,8 @@ def load_users():
                         fname=fname,
                         lname=lname,
                         password=hashed_password.decode('utf-8'),
-                        zipcode=zipcode)
+                        zipcode=zipcode,
+                        icon=url1 + icons.pop() + url2)
 
             # Add to the session or it won't be stored
             db.session.add(user)
@@ -48,6 +58,10 @@ def load_reviews():
     """Load fake reviews into database."""
 
     print("Reviews")
+    dates = [datetime(2018,3,14), datetime(2017,11,3), datetime(2018,1,26),
+             datetime(2018,7,27), datetime(2018,8,6), datetime(2018,5,4),
+             datetime(2017,12,30), datetime(2018,1,16), datetime(2017,10,14),
+             datetime(2018,6,27)]
 
     # Read review file and insert data
     with open("fake_data/fake_reviews.txt") as text:
@@ -62,14 +76,25 @@ def load_reviews():
              price_score,
              price_comment) = row.split("|")
 
-            review = Review(user_id=user_id,
-                            restaurant_id=restaurant_id,
-                            food_score=food_score,
-                            food_comment=food_comment,
-                            service_score=service_score,
-                            service_comment=service_comment,
-                            price_score=price_score,
-                            price_comment=price_comment)
+            if restaurant_id =='ChIJNZloNTd-j4ARxGMOXZp7KfI':
+                review = Review(created_at=dates.pop(),
+                                user_id=user_id,
+                                restaurant_id=restaurant_id,
+                                food_score=food_score,
+                                food_comment=food_comment,
+                                service_score=service_score,
+                                service_comment=service_comment,
+                                price_score=price_score,
+                                price_comment=price_comment)
+            else:
+                review = Review(user_id=user_id,
+                                restaurant_id=restaurant_id,
+                                food_score=food_score,
+                                food_comment=food_comment,
+                                service_score=service_score,
+                                service_comment=service_comment,
+                                price_score=price_score,
+                                price_comment=price_comment)
 
             db.session.add(review)
 
@@ -104,7 +129,6 @@ def load_middle_tables():
             row = row.rstrip()
 
             (dish_id,
-              dish,
               review_id,
               dish_comment) = row.split("|")
 

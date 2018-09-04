@@ -33,8 +33,11 @@
         display: flex;
         align-items: center;
       }
-      .fa-star {
+      #yellow-star {
         color: #fdbf13;
+      }
+      #gray-star {
+        color: #D3D3D3;
       }
       #review-photo {
         padding-top: 5px;
@@ -106,33 +109,61 @@
     {% for review in restaurant.reviews %}
       <div class="card">
         <div class="card-header">
-          <img src="{{ review.user.icon }}" height="40">
-          <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a>
+          <div class="row">
+            <div class="col-sm-2">
+              <img src="{{ review.user.icon }}" height="40">
+            </div>
+            <div class="col">
+              <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a>
+              <br><small>{{ review.created_at.strftime('%b %d, %Y') }} </small>
+            </div>
+          </div>
         </div>
         <div class="card-body">
             <h5 class="card-title">Food
               {% for n in range(review.food_score) %}
-                <i class="fas fa-star"></i>
+                <i class="fas fa-star" id="yellow-star"></i>
+              {% endfor %}
+              {% for n in range(5-review.food_score) %}
+                <i class="fas fa-star" id="gray-star"></i>
               {% endfor %}
             </h5>
-            <p class="card-text">
-              {{ review.food_comment }} 
-            </p>
             <h5 class="card-title">Service
               {% for n in range(review.service_score) %}
-                <i class="fas fa-star"></i>
+                <i class="fas fa-star" id="yellow-star"></i>
+              {% endfor %}
+              {% for n in range(5-review.service_score) %}
+                <i class="fas fa-star" id="gray-star"></i>
               {% endfor %}
             </h5>
-            <p class="card-text">  
-              {{ review.service_comment }}
-            </p>
             <h5 class="card-title">Price
               {% for n in range(review.price_score) %}
-                <i class="fas fa-star"></i>
+                <i class="fas fa-star" id="yellow-star"></i>
+              {% endfor %}
+              {% for n in range(5-review.price_score) %}
+                <i class="fas fa-star" id="gray-star"></i>
               {% endfor %}
             </h5>
-            <p class="card-text"> 
+<!--             <p class="card-text">  
+              {{ review.service_comment }}
+            </p> -->
+ <!--            <p class="card-text"> 
               {{ review.price_comment }}
+            </p> -->
+            <p class="card-text">
+              {% autoescape false %}
+                {{ review.food_comment }}
+              {% endautoescape %}
+            </p>
+            <p class="card-text">
+              {% if review.review_dishes %}
+                <h5 class="card-title">Dishes</h5>
+              {% endif %}
+              <h5>
+              {% for rev_dish in review.review_dishes %}
+                  <span class="badge badge-secondary">{{ rev_dish.dish.name }}</span>
+              {% endfor %}
+              </h5>
             </p>
             <div class="row">
             {% for photo in review.photos %}

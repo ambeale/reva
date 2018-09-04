@@ -1,14 +1,14 @@
 
-dishes = ['Tea-Smoked Garlic Chicken',
-            'Fire-Roasted Pepper & Mango Lamb',
-            'Roasted Beets & Orange Tuna',
-            'Pickled Sugar Pasta',
-            'Pan-Fried Confit of Rice',
-            'Gentle-Fried Blueberry & Mushroom Taco',
-            'Melon and Cranberry Jam',
-            'Mandarin and Banana Toast',
-            'Kiwi Whip',
-            'Lime Pastry']
+dishes = ['Fried chicken',
+            'Pad thai',
+            'Crab fried rice',
+            'Papaya salad',
+            'Short rib noodle soup',
+            'Thai tea',
+            'Pad see ew',
+            'Red curry',
+            'Spring rolls',
+            'Panang curry']
 
 
 for i in range(10):

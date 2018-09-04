@@ -1,10 +1,10 @@
-1|Tea-Smoked Garlic Chicken
-2|Fire-Roasted Pepper & Mango Lamb
-3|Roasted Beets & Orange Tuna
-4|Pickled Sugar Pasta
-5|Pan-Fried Confit of Rice
-6|Gentle-Fried Blueberry & Mushroom Taco
-7|Melon and Cranberry Jam
-8|Mandarin and Banana Toast
-9|Kiwi Whip
-10|Lime Pastry
+1|Fried chicken
+2|Pad thai
+3|Crab fried rice
+4|Papaya salad
+5|Short rib noodle soup
+6|Thai tea
+7|Pad see ew
+8|Red curry
+9|Spring rolls
+10|Panang curry

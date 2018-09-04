@@ -19,57 +19,76 @@
 
 <h3>Add a rating for {{ name }}:</h3>
     <form action="/add-review" id="review-form" enctype=multipart/form-data method="POST">
-        <h4>Food</h4>
+        <br>
         <div class="container">
-            Score:
-            <select name="food-score" id="food-score"required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        <br>
-        Dishes:
-        <div id="ms-data-ajax"></div>
-        <input type="file" name="file" accept="image/*" id="photos" multiple>
-        <br>
-        Review:<br>
-            <textarea rows="4" cols="50" name="food-comment" id="food-comment" required></textarea><br>
-        </div>
-        <h4>Service:</h4>
-            <div class="container">
-            Score:
-            <select name="service-score" id="service-score" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        <br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="service-comment" id="service-comment"></textarea><br>
-        </div>
-        <h4>Price</h4>
-        <div class="container">
-            Score:
-            <select name="price-score" id="price-score" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        <br>
-        Comment:<br>
-            <textarea rows="4" cols="50" name="price-comment" id="price-comment"></textarea>
+            <div class="row">
+                <div class="col-9">
+                    <div class="row">
+                        <div class="col">
+                            Food:
+                            <select name="food-score" id="food-score"required>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            Service:
+                            <select name="service-score" id="service-score" required>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            Price:
+                            <select name="price-score" id="price-score" required>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col">
+                            Dishes: 
+                            <div id="ms-data-ajax"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col">
+                            Review:<br>
+                            <textarea rows="4" cols="50" name="food-comment" id="food-comment" required></textarea>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col">
+                            Photos:
+                            <input type="file" name="file" accept="image/*" id="photos" multiple>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <input type="hidden" name="service-comment" id="service-comment" value="n/a"><br>
+            
+        <input type="hidden" name="price-comment" id="price-comment" value="n/a">
         <input type="hidden" name="restaurant" id="restaurant" value={{ restaurant_id }}>
         <input type="hidden" name="user-id" id="user-id" value="{{ session.get("user_id") }}">
-        <br><br>
-    </div>
+        <br>
         <input type="submit" value="Add review">
     </form>
+    </div>
+<br>
+<a href="/restaurant/{{ restaurant_id }}" class="btn btn-link">Back</a>
 
 <div class="modal fade" id="spinnerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm" role="document">
