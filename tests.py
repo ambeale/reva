@@ -1,6 +1,7 @@
-import server
+import server, seed
 import unittest
 import doctest
+import os
 
 def load_tests(loader, tests, ignore):
     """Run doctests and file-based doctests."""
@@ -114,14 +115,12 @@ class RouteTestsLoggedIn(unittest.TestCase):
         server.connect_to_db(server.app, "postgresql:///fakedb")
 
         # Create tables and add sample data
-        server.db.create_all()
         server.example_data()
 
         with self.client as c:
             with c.session_transaction() as sess:
                 sess['user_id'] = 1
 
-    
     def test_login_form(self):
         result = self.client.get('/login-form')
         self.assertNotIn(b'Sign In</h1>',
@@ -201,7 +200,6 @@ class ServerTests(unittest.TestCase):
         server.app.config['TESTING'] = True
         self.client = server.app.test_client()
 
-
     def test_index(self):
         result = self.client.get('/')
         self.assertIn(b'Discover your next favorite.',
@@ -211,6 +209,73 @@ class ServerTests(unittest.TestCase):
         result = self.client.get('/new-account-form')
         self.assertIn(b'<h2>Create account</h2>',
                         result.data)
+
+    def test_credentials(self):
+        result = self.client.get('/geocode-helper')
+        self.assertIn(os.environ['GOOGLE_API_KEY'].encode('utf-8'), result.data)
+
+class RestaurantTests(unittest.TestCase):   
+
+    def setUp(self):
+        server.app.config['TESTING'] = True
+        self.client = server.app.test_client()
+
+        # Connect to test database
+        server.connect_to_db(server.app, "postgresql:///fakedb")
+        server.db.create_all()
+
+        server.delete_example_data()
+
+    def tearDown(self):
+        """Do at end of every test."""
+
+        server.db.session.close()
+        server.db.drop_all()
+
+
+    def test_restaurant_search(self):
+
+        def _mock_api_call(search_term, location):
+            return {'results':[{"place_id": "ChIJfcaly4eAhYARSIvvfFpH64w",
+                                "name": "Tropisueno", "formatted_address": "Yerba"},
+                               {"place_id": "fake-id", "name": "Not Real", 
+                                "formatted_address": "Foo Bar"}]}
+
+        server.restaurant_search_api_call = _mock_api_call
+
+        seed.load_restaurants()
+        seed.load_users()
+        seed.load_reviews()
+
+        result = self.client.get('/restaurant-search',
+                                   query_string={'search-restaurant': 'foo',
+                                                  'restaurant-location': 'bar'},
+                                   follow_redirects=True)
+
+        self.assertIn(b'Rating: 3.06', result.data)
+
+        self.assertIn(b'Reviews: 10', result.data)
+
+        self.assertIn(b'Foo Bar', result.data)
+
+    def test_seed(self):
+
+        seed.load_restaurants()
+        seed.load_users()
+        seed.set_val_user_id()
+        seed.load_reviews()
+        seed.load_dishes()
+        seed.set_val_dish_id()
+        seed.load_middle_tables()
+
+        query = "SELECT last_value FROM users_user_id_seq;"
+        cursor = server.db.session.execute(query).fetchone()
+        self.assertEqual(cursor[0], 10)
+
+        query = "SELECT last_value FROM dishes_dish_id_seq;"
+        cursor = server.db.session.execute(query).fetchone()
+        self.assertEqual(cursor[0], 10)
+
 
 
 

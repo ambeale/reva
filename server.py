@@ -295,8 +295,6 @@ def render_restaurant_dish_search():
     matching_dishes = query.filter(RestaurantDish.restaurant_id==restaurant,
                                     Dish.name.ilike(search_input)).all()
 
-    print(matching_dishes)
-
     return render_template("restaurant_dish_search_results.html",
                             dishes=matching_dishes,
                             search_dish=dish, restaurant_id=restaurant)
@@ -533,7 +531,6 @@ def return_matching_dishes():
     """Query dishes table for matching entries and return json list"""
 
     search_term = "%" + request.form.get("query") + "%"
-    print(search_term)
 
     matching_dishes = Dish.query.filter(Dish.name.ilike(search_term)).all()
     dishes_list = []
@@ -817,9 +814,7 @@ def calculate_user_review_count(user_list):
 def example_data():
     """Create some sample user data."""
 
-    Favorite.query.delete()
-    User.query.delete()
-    Restaurant.query.delete()
+    delete_example_data()
 
     # Hash password using bcrypt
     salt = bcrypt.gensalt()
@@ -844,6 +839,15 @@ def example_data():
     # Set the value for the next user_id to be max_id + 1
     query = "SELECT setval('users_user_id_seq', :new_id)"
     db.session.execute(query, {'new_id': max_id + 1})
+    db.session.commit()
+
+
+def delete_example_data():
+    """Delete added data added to fakedb for testing"""
+
+    Favorite.query.delete()
+    User.query.delete()
+    Restaurant.query.delete()
     db.session.commit()
 
 

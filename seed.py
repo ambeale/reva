@@ -3,13 +3,33 @@
 from sqlalchemy import func
 from datetime import datetime
 import bcrypt
-from model import User, Review, Dish, ReviewDish, RestaurantDish
+from model import Restaurant, User, Review, Dish, ReviewDish, RestaurantDish
 from model import connect_to_db, db
 from server import app
 
 
-# IMPORTANT: Be sure to run psql [db_name] < fake_data/restaurants.pg 
-#            before seed.py file to seed with restaurants from Google API
+def load_restaurants():
+    """Load testing restaurants into database"""
+    print("Restaurants")
+
+    with open("fake_data/restaurants.txt") as text:
+        for row in text:
+            row = row.rstrip()
+            restaurant_id, name, number, address, website, lat, lon = row.split("|")
+
+            restaurant = Restaurant(restaurant_id=restaurant_id,
+                                    name=name, 
+                                    phone_number=number, 
+                                    address=address, 
+                                    website=website,
+                                    lat=lat,
+                                    lon=lon)
+
+            # Add to the session or it won't be stored
+            db.session.add(restaurant)
+
+    db.session.commit()
+
 
 def load_users():
     """Load fake users into database."""
@@ -100,6 +120,7 @@ def load_reviews():
 
     db.session.commit()
 
+
 def load_dishes():
     """Load fake dishes into database."""
 
@@ -180,6 +201,7 @@ if __name__ == "__main__":
     db.create_all()
 
     # Import different types of data
+    load_restaurants()
     load_users()
     set_val_user_id()
     load_reviews()
