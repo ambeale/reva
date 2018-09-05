@@ -2,49 +2,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" />
     <!-- Custom styles for this template -->
     <link href="/static/css/restaurant_pages.css" rel="stylesheet">
-    <!-- <style>
-      #map {
-          height: 35%;
-      }
-      #rating-chart div {
-          font: 10px sans-serif;
-          /*background-color: steelblue;*/
-          text-align: right;
-          padding: 3px;
-          margin: 1px;
-          color: white;
-      }
-      #rating-label {
-          font: 13px sans-serif;
-          line-height: 19px;
-          margin-left: 15px;
-      }
-      .inline-block-paragraph {
-          display: inline-block;
-          width: 50px;
-          height: 75px;
-          font: 10px sans-serif;
-          vertical-align: top;
-      }
-      #center-jumbo {
-        margin-top: 20px;
-        padding-top: 30px; 
-        padding-bottom: 30px;
-      }
-      .vertical-align {
-        display: flex;
-        align-items: center;
-      }
-      #yellow-star {
-        color: #fdbf13;
-      }
-      #gray-star {
-        color: #D3D3D3;
-      }
-      #review-photo {
-        padding-top: 5px;
-      }
-    </style> -->
 </head>
 
 {% extends 'base.html' %}
@@ -127,6 +84,7 @@
           </div>
         </div>
         <div class="card-body">
+          <div class="container">
           <div class="row">
             <div class="col-4">
               <h5 class="card-title">Food</h5>
@@ -169,13 +127,8 @@
               </h5>
             </div>
           </div>
-<!--             <p class="card-text">  
-              {{ review.service_comment }}
-            </p> -->
- <!--            <p class="card-text"> 
-              {{ review.price_comment }}
-            </p> -->
-            <p class="card-text">
+        </div>
+            <p class="card-text mt-2">
               {% autoescape false %}
                 {{ review.food_comment }}
               {% endautoescape %}
