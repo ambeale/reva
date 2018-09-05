@@ -1,32 +1,112 @@
+<head>
+    <link href="/static/css/restaurant_pages.css" rel="stylesheet">
+</head>
+
 {% extends 'base.html' %}
 {% block content %}
 
 <h2>Reviews tagged with "{{ dish.name }}" at {{ restaurant.name }}:</h2>
+<br>
 
-{% for review in reviews %}
-    <p>
-        <h4>Name: <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a></h4>
-        Food score: {{ review.food_score }} <br>
-        <ul>
-            <li>{{ review.food_comment }}</li>
-        </ul>
-        Service score: {{ review.service_score }} <br>
-        <ul>
-            <li>{{ review.service_comment }}</li>
-        </ul>
-        Price score: {{ review.price_score }} <br>
-        <ul>
-            <li>{{ review.price_comment }}</li>
-        </ul>
-        Dishes: 
-        <ul>
-        {% for rd in review.review_dishes %}
-            <li>{{ rd.dish.name }}</li>
-        {% endfor %}
-        </ul>
-    </p>
-{% endfor %}
+<div class="container-fluid">
+  <div class="card-columns">
+    {% for review in reviews %}
+      <div class="card">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-sm-2">
+              <img src="{{ review.user.icon }}" height="40">
+            </div>
+            <div class="col">
+              <a href="/user/{{ review.user.user_id }}">{{ review.user.fname }} {{ review.user.lname }}</a>
+              <br><small>{{ review.created_at.strftime('%b %d, %Y') }} </small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Food</h5>
+            </div>
+            <div class="col"><h5>
+                {% for n in range(review.food_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.food_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Service</h5>
+            </div>
+            <div class="col"><h5>
+                {% for n in range(review.service_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.service_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Price</h5>
+              </div>
+            <div class="col"><h5>
+                {% for n in range(review.price_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.price_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+<!--             <p class="card-text">  
+              {{ review.service_comment }}
+            </p> -->
+ <!--            <p class="card-text"> 
+              {{ review.price_comment }}
+            </p> -->
+            <p class="card-text">
+              {% autoescape false %}
+                {{ review.food_comment }}
+              {% endautoescape %}
+            </p>
+            <p class="card-text">
+              {% if review.review_dishes %}
+                <h5 class="card-title">Dishes</h5>
+              {% endif %}
+              <h5>
+              {% for rev_dish in review.review_dishes %}
+                  <span class="badge badge-secondary">{{ rev_dish.dish.name }}</span>
+              {% endfor %}
+              </h5>
+            </p>
+            <p class="card-text">
+            {% if review.photos %}
+              <h5 class="card-title">Photos</h5>
+            {% endif %}
+            {% for photo in review.photos %}
+                <a href="{{ photo.url }}" data-toggle="lightbox" data-max-height="400" data-gallery="example-gallery" class="col-sm-4 text-center">
+                  <img src="{{ photo.url }}" height="80" id="review-photo">
+                </a>
+            {% endfor %}
+            </p>
+          </div>
+        </div>
+    {% endfor %}
+  </div>
 
+<hr>
+ <p>
+    <a href="/restaurant/{{ restaurant.restaurant_id }}">All reviews</a>
+</p>
+</div>
 
 
 {% endblock %}
