@@ -1,14 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{% for result in results %}
-    <h3>
-        <a href="/user/{{ result.user_id }}">
-            {{ result.fname }} {{ result.lname }}
-        </a>
-    </h3>
-    Location: {{ result.zipcode }}<br>
-    Reviews: {{ result.count_reviews }}
-{% endfor %}
+
+<div class="container-fluid my-4">
+    <h1 class="mb-4">User Search Results</h1>
+    {% if results %}
+    <div class="card" style="width: 18rem;">
+        <ul class="list-group list-group-flush">
+            {% for result in results %}
+                <li class="list-group-item"><a href="/user/{{ result.user_id }}">{{ result.fname }} {{ result.lname }}</a><br>
+                Location: {{ result.zipcode }}<br>
+                Reviews: {{ result.count_reviews }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% else %}
+    <p>No matching users found</p>
+    {% endif %}
+
+<hr>
+<p>
+    <a href="/"><< Return to homepage</a>
+</p>
+</div>
 
 {% endblock %}

@@ -19,7 +19,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
+<div class="container-fluid">
 <h3>Add a rating for {{ name }}:</h3>
     <form action="/add-review" id="review-form" enctype=multipart/form-data method="POST">
         <br>
@@ -89,7 +89,8 @@
     </div>
 <br>
 <hr>
-<a href="/restaurant/{{ restaurant_id }}" class="btn btn-link">Back</a>
+<a href="/restaurant/{{ restaurant_id }}" class="btn btn-link">Back to {{ name }} </a>
+</div>
 
 <div class="modal fade" id="spinnerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm" role="document">
