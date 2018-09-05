@@ -7,6 +7,9 @@
     #search-nav {
         width: 100%;
     }
+    #restaurant-cards{
+        display: flex;
+    }
     </style>
 </head>
 
@@ -31,14 +34,14 @@
 <div class="container-fluid">
   <div class="row" id="search-results">
     {% for result in results %}
-    <!-- <div class="col-md-4 mb-3"> -->
-        <div class="col-4 card text-center align-center">
-            <div class="card-body text-dark text-center">
-                <h4 class="card-title">
-                    <a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a>
-                </h4>
-                <h6 class="card-subtitle mb-2 text-muted">{{ result.formatted_address }}</h6>
-                <div class="row">
+    <div class="col-md-4 p-2 mb-3 text-center" id="restaurant-cards">
+        <!-- <div class="col-4 card text-center align-center"> -->
+            <div class="d-flex flex-column rounded border card-body text-dark text-center">
+                    <h4 class="card-title">
+                        <a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a>
+                    </h4>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ result.formatted_address }}</h6>
+                <div class="d-flex flex-row">
                     <p class="card-text">
                         <div class="col text-right">
                             Reviews: {{ result.count_reviews }}
