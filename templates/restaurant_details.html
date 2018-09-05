@@ -31,14 +31,14 @@
       <div class="row">
         <div class="col">
           <!-- <h3>Details</h3> -->
-          <p>
+          <p class="lead">
             {{ restaurant.address }}<br>
             <a href="{{ restaurant.website }}">{{ restaurant.website }}</a><br>
-            {{ restaurant.phone_number }}
+            {{ restaurant.phone_number }}<br>
+          Reviews: {{ restaurant.count_reviews }}
           </p>
-          <p>
-          <h5>Reviews: {{ restaurant.count_reviews }}</h5>
-          <h5>Overall rating: {{ restaurant.reva_rating }}</h5>
+          <p class="lead"> 
+          Overall rating: {{ restaurant.reva_rating }}
           </p>
           <!-- <h3>Ratings</h3> -->
           <div id="rating-label" class="inline-block-paragraph">
