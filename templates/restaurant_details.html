@@ -1,6 +1,8 @@
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" />
-    <style>
+    <!-- Custom styles for this template -->
+    <link href="/static/css/restaurant_pages.css" rel="stylesheet">
+    <!-- <style>
       #map {
           height: 35%;
       }
@@ -42,7 +44,7 @@
       #review-photo {
         padding-top: 5px;
       }
-    </style>
+    </style> -->
 </head>
 
 {% extends 'base.html' %}
@@ -50,7 +52,7 @@
 <main role="main">
   <div class="container-fluid">
     <div class="row vertical-align">
-      <div class="col-8">
+      <div class="col-10">
         <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span>
         </h2>
       </div>
@@ -125,30 +127,48 @@
           </div>
         </div>
         <div class="card-body">
-            <h5 class="card-title">Food
-              {% for n in range(review.food_score) %}
-                <i class="fas fa-star" id="yellow-star"></i>
-              {% endfor %}
-              {% for n in range(5-review.food_score) %}
-                <i class="fas fa-star" id="gray-star"></i>
-              {% endfor %}
-            </h5>
-            <h5 class="card-title">Service
-              {% for n in range(review.service_score) %}
-                <i class="fas fa-star" id="yellow-star"></i>
-              {% endfor %}
-              {% for n in range(5-review.service_score) %}
-                <i class="fas fa-star" id="gray-star"></i>
-              {% endfor %}
-            </h5>
-            <h5 class="card-title">Price
-              {% for n in range(review.price_score) %}
-                <i class="fas fa-star" id="yellow-star"></i>
-              {% endfor %}
-              {% for n in range(5-review.price_score) %}
-                <i class="fas fa-star" id="gray-star"></i>
-              {% endfor %}
-            </h5>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Food</h5>
+            </div>
+            <div class="col"><h5>
+                {% for n in range(review.food_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.food_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Service</h5>
+            </div>
+            <div class="col"><h5>
+                {% for n in range(review.service_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.service_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Price</h5>
+              </div>
+            <div class="col"><h5>
+                {% for n in range(review.price_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.price_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
 <!--             <p class="card-text">  
               {{ review.service_comment }}
             </p> -->
@@ -170,13 +190,16 @@
               {% endfor %}
               </h5>
             </p>
-            <div class="row">
+            <p class="card-text">
+            {% if review.photos %}
+              <h5 class="card-title">Photos</h5>
+            {% endif %}
             {% for photo in review.photos %}
                 <a href="{{ photo.url }}" data-toggle="lightbox" data-max-height="400" data-gallery="example-gallery" class="col-sm-4 text-center">
                   <img src="{{ photo.url }}" height="80" id="review-photo">
                 </a>
             {% endfor %}
-            </div>
+            </p>
           </div>
         </div>
     {% endfor %}

@@ -23,29 +23,35 @@
         </form>
       </div>
 </nav>
+</div>
 
 
 <br>
 
-<div class="container">
+<div class="container-fluid">
   <div class="row" id="search-results">
     {% for result in results %}
-<!--     <div class="col-md-4">
-    <div class="card border-light mb-3" style="max-width: 25rem; max-height: 10rem;"> -->
-    <div class="col-md-6 mb-3">
-        <div class="card">
-            <div class="card-body text-dark">
-                <h4 class="card-title"><a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a></h3>
+    <!-- <div class="col-md-4 mb-3"> -->
+        <div class="col-4 card text-center align-center">
+            <div class="card-body text-dark text-center">
+                <h4 class="card-title">
+                    <a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a>
+                </h4>
                 <h6 class="card-subtitle mb-2 text-muted">{{ result.formatted_address }}</h6>
-                <p class="card-text">
-                    Reviews: {{ result.count_reviews }}<br>
-                    Rating: {{ result.reva_rating }}
-                </p>
+                <div class="row">
+                    <p class="card-text">
+                        <div class="col text-right">
+                            Reviews: {{ result.count_reviews }}
+                        </div>
+                        <div class="col text-left">
+                            Rating: {{ result.reva_rating }}
+                        </div>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
     {% endfor %}
-    
     </div>
 </div>
 
@@ -58,7 +64,6 @@
     </div>
     {% endif %}
 
-</div>
 
 {% endblock %}
 

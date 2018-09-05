@@ -2,16 +2,22 @@
 {% block content %}
 <h2>Dishes found matching "{{ search_dish }}":</h2>
 
-{% for dish in dishes %}
-<p>
-    <a href="/dish-reviews/{{ dish.dish_id }}/{{ restaurant_id }}">{{ dish.name}}</a>
-</p>
-{% endfor %}
+<div class="container-fluid">
+    {% if dishes %}
+    <div class="card" style="width: 18rem;">
+        <ul class="list-group list-group-flush">
+            {% for dish in dishes %}
+                <li class="list-group-item"><a href="/dish-reviews/{{ dish.dish_id }}/{{ restaurant_id }}">{{ dish.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
 
-{% if not dishes %}
-<p>No matching dishes found</p>
-{% endif %}
------------------
+    {% else %}
+    <p>No matching dishes found</p>
+    {% endif %}
+</div>
+
+<hr>
 <p>
     <a href="/restaurant/{{ restaurant_id }}">Back to reviews</a>
 </p>
