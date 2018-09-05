@@ -202,7 +202,9 @@ def display_restaurant_search_results():
     # Render template with search results
     return render_template("restaurant_search_results.html",
                            results=full_results,
-                           next_page=next_page_token)
+                           next_page=next_page_token,
+                           search_term=search_term,
+                           location=location)
 
 
 @app.route('/restaurant-search/page/<page>.json')

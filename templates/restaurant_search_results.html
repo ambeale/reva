@@ -1,23 +1,64 @@
+<head>
+    <style type="text/css">
+    .navbar {
+      margin-bottom: 0px !important;
+      background-color: #fdbf13;
+    }
+    #search-nav {
+        width: 100%;
+    }
+    </style>
+</head>
+
 {% extends 'base.html' %}
 {% block content %}
 
+<div class="container">
+<nav class="navbar navbar-expand navbar-light bg-light">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form class="form-inline my-2 mx-auto my-lg-0" id="search-nav">
+            <input class="mx-1 flex-fill form-control" type="search" value="{{ search_term }}" name="search-restaurant" aria-label="Search">
+            <input class="mx-1 flex-fill form-control" type="search" value="{{ location }}" name="restaurant-location" aria-label="Search">
+            <button class="btn btn-outline-secondary ml-1 my-2 my-sm-0" type="submit">Search</button>
+        </form>
+      </div>
+</nav>
 
-<div class="container-fluid">
+
+<br>
+
+<div class="container">
   <div class="row" id="search-results">
     {% for result in results %}
-      <div class="col-md-6">
-        <h3><a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a></h3>
-        {{ result.formatted_address }}<br>
-        Reviews: {{ result.count_reviews }}<br>
-        Rating: {{ result.reva_rating }}
-      </div>
+<!--     <div class="col-md-4">
+    <div class="card border-light mb-3" style="max-width: 25rem; max-height: 10rem;"> -->
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body text-dark">
+                <h4 class="card-title"><a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a></h3>
+                <h6 class="card-subtitle mb-2 text-muted">{{ result.formatted_address }}</h6>
+                <p class="card-text">
+                    Reviews: {{ result.count_reviews }}<br>
+                    Rating: {{ result.reva_rating }}
+                </p>
+            </div>
+        </div>
+    </div>
     {% endfor %}
-  </div>
+    
+    </div>
 </div>
 
-{% if next_page %}
-<button type="button" id="more-results" class="btn btn-link">More</button>
-{% endif %}
+    {% if next_page %}
+    <hr>
+    <div class="row">
+        <div class="col text-center">
+            <button type="button" id="more-results" class="btn btn-link">More</button>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
 
 {% endblock %}
 

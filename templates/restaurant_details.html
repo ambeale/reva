@@ -25,7 +25,7 @@
           vertical-align: top;
       }
       #center-jumbo {
-        /*margin-top: 20px;*/
+        margin-top: 20px;
         padding-top: 30px; 
         padding-bottom: 30px;
       }
@@ -50,16 +50,16 @@
 <main role="main">
   <div class="container-fluid">
     <div class="row vertical-align">
-      <div class="col">
+      <div class="col-8">
         <h2 class="display-4">{{ restaurant.name }} <span id="fav" loggedin="{{ session.get("user_id") }}" rest="{{ restaurant.restaurant_id }}"></span>
         </h2>
       </div>
-      <div class="col text-center">
+      <div class="col">
           {% if session.get("user_id") %}
           <form action="/review-form">
               <input type="hidden" name="restaurant-name" value="{{ restaurant.name }}">
               <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
-              <button type="submit" class="btn btn-lg btn-outline-dark">Add a review</button>
+              <button type="submit" class="btn btn-lg btn-outline-dark mt-3">Add a review</button>
           </form>
         {% endif %}
      </div>
@@ -71,13 +71,17 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col">
-          <h3>Details</h3>
+          <!-- <h3>Details</h3> -->
           <p>
-          Address: {{ restaurant.address }}<br>
-          Reviews: {{ restaurant.count_reviews }}<br>
-          Overall rating: {{ restaurant.reva_rating }}
+            {{ restaurant.address }}<br>
+            <a href="{{ restaurant.website }}">{{ restaurant.website }}</a><br>
+            {{ restaurant.phone_number }}
           </p>
-          <h3>Ratings</h3>
+          <p>
+          <h5>Reviews: {{ restaurant.count_reviews }}</h5>
+          <h5>Overall rating: {{ restaurant.reva_rating }}</h5>
+          </p>
+          <!-- <h3>Ratings</h3> -->
           <div id="rating-label" class="inline-block-paragraph">
           Food: <br>
           Service:<br>
@@ -93,16 +97,17 @@
   </div>
 </div>
 
+<div class="container-fluid">
+  <h1>Reviews</h1>
 
-<h1>Reviews</h1>
-
-<form action="/restaurant-dish-search">
-    <p class="lead">Search for a dish:
-    <input type="text" name="dish-search">
-    <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
-    <button type="submit" class="btn btn-outline-dark">Search</button>
-    </p>
-</form>
+  <form action="/restaurant-dish-search">
+      <p class="lead">Search for a dish:
+        <input type="text" name="dish-search">
+        <input type="hidden" name="restaurant-id" value="{{ restaurant.restaurant_id }}">
+        <button type="submit" class="btn btn-outline-dark">Search</button>
+      </p>
+  </form>
+</div>
 
 <div class="container-fluid">
   <div class="card-columns">

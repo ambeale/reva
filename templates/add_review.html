@@ -10,6 +10,9 @@
         .fa-spinner {
             color: #fdbf13;
         }
+        .fa-question-circle {
+            color: #fdbf13;
+        }
     </style>
 </head>
 
@@ -25,8 +28,8 @@
                 <div class="col-9">
                     <div class="row">
                         <div class="col">
-                            Food:
-                            <select name="food-score" id="food-score"required>
+                            <label>Food:</label>
+                            <select class="form-control" name="food-score" id="food-score"required>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -35,8 +38,8 @@
                             </select>
                         </div>
                         <div class="col">
-                            Service:
-                            <select name="service-score" id="service-score" required>
+                            <label>Service:</label>
+                            <select class="form-control" name="service-score" id="service-score" required>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -45,8 +48,8 @@
                             </select>
                         </div>
                         <div class="col">
-                            Price:
-                            <select name="price-score" id="price-score" required>
+                            <label>Price: <i class="fas fa-question-circle" data-toggle="tooltip" data-placement="top" title="Was it worth the cost?" id="price-tt"></i></label>
+                            <select class="form-control" name="price-score" id="price-score" required>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -57,34 +60,31 @@
                     </div>
                     <br>
                     <div class="row">
-                        <div class="col">
-                            Dishes: 
+                        <div class="col-8">
+                            <label>Dishes: </label>
                             <div id="ms-data-ajax"></div>
                         </div>
-                    </div>
-                    <br>
-                    <div class="row">
                         <div class="col">
-                            Review:<br>
-                            <textarea rows="4" cols="50" name="food-comment" id="food-comment" required></textarea>
+                            <label>Photos: </label>
+                            <input class="form-control-file" type="file" name="file" accept="image/*" id="photos" multiple>
                         </div>
                     </div>
                     <br>
                     <div class="row">
                         <div class="col">
-                            Photos:
-                            <input type="file" name="file" accept="image/*" id="photos" multiple>
+                            <label>Review:</label>
+                            <textarea class="form-control" rows="4" cols="50" name="food-comment" id="food-comment" required></textarea>
                         </div>
                     </div>
+                    <br>
                 </div>
             </div>
+        <button type="submit" class="btn btn-lg btn-outline-dark mt-3">Add review</button>
         <input type="hidden" name="service-comment" id="service-comment" value="n/a"><br>
-            
         <input type="hidden" name="price-comment" id="price-comment" value="n/a">
         <input type="hidden" name="restaurant" id="restaurant" value={{ restaurant_id }}>
         <input type="hidden" name="user-id" id="user-id" value="{{ session.get("user_id") }}">
-        <br>
-        <input type="submit" value="Add review">
+
     </form>
     </div>
 <br>
@@ -104,7 +104,9 @@
 
 {% block scripts %}
 <script src="/static/magicsuggest/magicsuggest-min.js"></script>
-
 <script type="text/javascript" src="static/js/add-review.js"></script>
+<script type="text/javascript">
+    $('#price-tt').tooltip()
+</script>
 
 {% endblock %}
