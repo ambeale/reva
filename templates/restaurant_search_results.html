@@ -1,10 +1,9 @@
 <head>
     <style type="text/css">
-    .navbar {
-      margin-bottom: 0px !important;
-      background-color: #fdbf13;
+    #search-nav{
+      margin-top: 20px;
     }
-    #search-nav {
+    #form-nav {
         width: 100%;
     }
     #restaurant-cards{
@@ -16,10 +15,12 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<h1 class="text-center">Results</h1>
+
 <div class="container">
-<nav class="navbar navbar-expand navbar-light bg-light">
+<nav class="navbar navbar-expand navbar-light bg-light" id="search-nav">
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <form class="form-inline my-2 mx-auto my-lg-0" id="search-nav">
+        <form class="form-inline my-2 mx-auto my-lg-0" id="form-nav">
             <input class="mx-1 flex-fill form-control" type="search" value="{{ search_term }}" name="search-restaurant" aria-label="Search">
             <input class="mx-1 flex-fill form-control" type="search" value="{{ location }}" name="restaurant-location" aria-label="Search">
             <button class="btn btn-outline-secondary ml-1 my-2 my-sm-0" type="submit">Search</button>
@@ -29,19 +30,16 @@
 </div>
 
 
-<br>
-
 <div class="container-fluid">
   <div class="row" id="search-results">
     {% for result in results %}
-    <div class="col-md-4 p-2 mb-3 text-center" id="restaurant-cards">
-        <!-- <div class="col-4 card text-center align-center"> -->
+    <div class="col-md-4 p-2 text-center" id="restaurant-cards">
             <div class="d-flex flex-column rounded border card-body text-dark text-center">
                     <h4 class="card-title">
                         <a href="/restaurant/{{ result["place_id"] }}">{{ result.name }}</a>
                     </h4>
                     <h6 class="card-subtitle mb-2 text-muted">{{ result.formatted_address }}</h6>
-                <div class="d-flex flex-row">
+                <div class="d-flex flex-row mt-auto">
                     <p class="card-text">
                         <div class="col text-right">
                             Reviews: {{ result.count_reviews }}
@@ -53,7 +51,6 @@
                 </div>
             </div>
         </div>
-    <!-- </div> -->
     {% endfor %}
     </div>
 </div>
@@ -84,12 +81,18 @@
         next_page_token = result[1]
 
         for (let i = 0; i < r.length; i++) {
-            $("#search-results").append('<div class="col-md-6">' +
-                `<h3><a href="/restaurant/${r[i].place_id}">${r[i].name}</a></h3>` +
-                `${r[i].formatted_address}<br>` +
-                `Reviews: ${r[i].count_reviews}<br>` +
+            $("#search-results").append('<div class="col-md-4 p-2 text-center" id="restaurant-cards">' +
+                '<div class="d-flex flex-column rounded border card-body text-dark text-center">' +
+                '<h4 class="card-title">' +
+                `<a href="/restaurant/${r[i].place_id}">${r[i].name}</a></h4>` +
+                `<h6 class="card-subtitle mb-2 text-muted">${r[i].formatted_address}</h6>` +
+                '<div class="d-flex flex-row mt-auto">' +
+                '<p class="card-text">' +
+                '<div class="col text-right">' +
+                `Reviews: ${r[i].count_reviews}</div>` +
+                '<div class="col text-left">' +
                 `Rating: ${r[i].reva_rating}` +
-                '</div>');
+                '</div></p></div></div></div>');
         }
 
         if (!(next_page_token)) {
