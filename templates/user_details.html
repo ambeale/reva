@@ -1,11 +1,12 @@
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" />
+    <link href="/static/css/restaurant_pages.css" rel="stylesheet">
     <style>
-      .fa-star {
-        color: #fdbf13;
-      }
       #review-photo {
         padding-top: 5px;
+      }
+      .fa-heart {
+        color: #fdbf13;
       }
     </style>
 </head>
@@ -16,22 +17,25 @@
   <h2 class="display-4">{{ user.fname }} {{ user.lname }}</h2>
 </div>
 
-<div class="jumbotron">
+<div class="jumbotron py-4 my-4">
   <div class="row">
-    <div class="col-md-1"></div>
-    <div class="col-md-2 text-right">
+    <!-- <div class="col-md-1"></div> -->
+    <div class="col text-right">
       <img src="{{ user.icon }}" height="200">
     </div>
-    <div class="col-md-2">
+    <div class="col text-left">
+      <h3>User details</h3>
+      <p>
       Zipcode: {{ user.zipcode }} <br>
-      Reviews: {{ user.reviews | length }}<br>
+      Reviews: {{ user.reviews | length }}
+      </p>
     </div>
-    <div class="col">
-      Favorites:
+    <div class="col-6">
+      <h3>Favorites:</h3>
       <div class="row">
         {% for favorite in user.favorites %}
           <div class="col-md-6">
-            <li><a href="/restaurant/{{ favorite.restaurant.restaurant_id }}">{{ favorite.restaurant.name }}</a></li>
+            <i class="fas fa-heart"></i><a href="/restaurant/{{ favorite.restaurant.restaurant_id }}">  {{ favorite.restaurant.name }}</a>
           </div>
         {% endfor %}
         {% if not user.favorites %}
@@ -41,76 +45,87 @@
     </div>
   </div>
 </div>
-<!-- 
-<div class="container-fluid">
-  <div class="card-columns">
-    {% for review in user.reviews %}
-      <div class="card">
-        <div class="card-header">
-          <a href="/restaurant/{{ review.restaurant_id }}">
-                {{ review.restaurant.name }}</a>
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">Food</h5>
-                <p class="card-text">
-                  Score: {{ review.food_score }} <br>
-                  Comment: {{ review.food_comment }} 
-                </p>
-            <h5 class="card-title">Service</h5>
-                <p class="card-text">  
-                  Score: {{ review.service_score }} <br>
-                  Comment: {{ review.service_comment }}
-                </p>
-            <h5 class="card-title">Price</h5>
-                <p class="card-text"> 
-                  Score: {{ review.price_score }} <br>
-                  Comment: {{ review.price_comment }}
-                </p>
-        </div>
-      </div>
-{% endfor %}
-</div>
-</div> -->
+
 
 <div class="container-fluid">
+  <h1 class="mb-4">Reviews</h1>
   <div class="card-columns">
     {% for review in user.reviews %}
       <div class="card">
         <div class="card-header">
-          <a href="/restaurant/{{ review.restaurant_id }}">{{ review.restaurant.name }}</a>
+          <h5 class="mb-0"><a href="/restaurant/{{ review.restaurant_id }}">{{ review.restaurant.name }}</a></h5>
+          <small>{{ review.created_at.strftime('%b %d, %Y') }} </small>
         </div>
         <div class="card-body">
-            <h5 class="card-title">Food
-              {% for n in range(review.food_score) %}
-                <i class="fas fa-star"></i>
-              {% endfor %}
-            </h5>
+          <div class="container">
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Food</h5>
+            </div>
+            <div class="col"><h5>
+                {% for n in range(review.food_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.food_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Service</h5>
+            </div>
+            <div class="col"><h5>
+                {% for n in range(review.service_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.service_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <h5 class="card-title">Price</h5>
+              </div>
+            <div class="col"><h5>
+                {% for n in range(review.price_score) %}
+                  <i class="fas fa-star" id="yellow-star"></i>
+                {% endfor %}
+                {% for n in range(5-review.price_score) %}
+                  <i class="fas fa-star" id="gray-star"></i>
+                {% endfor %}
+              </h5>
+            </div>
+          </div>
+        </div>
+            <p class="card-text mt-2">
+              {% autoescape false %}
+                {{ review.food_comment }}
+              {% endautoescape %}
+            </p>
             <p class="card-text">
-              {{ review.food_comment }} 
-            </p>
-            <h5 class="card-title">Service
-              {% for n in range(review.service_score) %}
-                <i class="fas fa-star"></i>
+              {% if review.review_dishes %}
+                <h5 class="card-title">Dishes</h5>
+              {% endif %}
+              <h5>
+              {% for rev_dish in review.review_dishes %}
+                  <span class="badge badge-secondary">{{ rev_dish.dish.name }}</span>
               {% endfor %}
-            </h5>
-            <p class="card-text">  
-              {{ review.service_comment }}
+              </h5>
             </p>
-            <h5 class="card-title">Price
-              {% for n in range(review.price_score) %}
-                <i class="fas fa-star"></i>
-              {% endfor %}
-            </h5>
-            <p class="card-text"> 
-              {{ review.price_comment }}
-            </p>
-            <div class="row">
+            <p class="card-text">
+            {% if review.photos %}
+              <h5 class="card-title">Photos</h5>
+            {% endif %}
             {% for photo in review.photos %}
                 <a href="{{ photo.url }}" data-toggle="lightbox" data-max-height="400" data-gallery="example-gallery" class="col-sm-4 text-center">
                   <img src="{{ photo.url }}" height="80" id="review-photo">
                 </a>
             {% endfor %}
-            </div>
+            </p>
           </div>
         </div>
     {% endfor %}

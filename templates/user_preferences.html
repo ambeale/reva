@@ -1,29 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>Update Preferences</h1>
-<br>
-<h3>Score weighting:</h3>
-<p>
-<form action="/update-weightings" method="POST">
-  <div class="row">
-    <div class="col-md-4">
-        Food: <input type="text" name="food-weight" value="{{ user.food_weighting * 100 }}" required> %
+<div class="container-fluid">
+
+  <h1 class="mb-4">Update Preferences</h1>
+  <h3>Score weighting:</h3>
+  <p>
+  <form action="/update-weightings" method="POST">
+    <div class="row">
+      <div class="col-md-4">
+          Food: <input type="text" name="food-weight" value="{{ user.food_weighting * 100 }}" required> %
+      </div>
+      <div class="col-md-4">
+          Service: <input type="text" name="service-weight" value="{{ user.service_weighting * 100 }}" required> %
+      </div>
+      <div class="col-md-4">
+          Price: <input type="text" name="price-weight" value="{{ user.price_weighting * 100 }}" required> %
+      </div>
     </div>
-    <div class="col-md-4">
-        Service: <input type="text" name="service-weight" value="{{ user.service_weighting * 100 }}" required> %
+    <br>
+    <div class="row">
+      <div class="col-md-12 text-center">
+          <input type="submit" class="btn btn-lg btn-outline-secondary align-center" value="Update">
+      </div>
     </div>
-    <div class="col-md-4">
-        Price: <input type="text" name="price-weight" value="{{ user.price_weighting * 100 }}" required> %
-    </div>
-  </div>
-  <br>
-  <div class="row">
-    <div class="col-md-12 text-center">
-        <input type="submit" class="btn btn-lg btn-secondary align-center" value="Update">
-    </div>
-  </div>
-</form></p>
+  </form></p>
 
 <br>
 <h3>Profile image:</h3>
@@ -39,10 +40,11 @@
   <br>
   <div class="row">
     <div class="col-md-12 text-center">
-        <input type="submit" class="btn btn-lg btn-secondary align-center" value="Update">
+        <input type="submit" class="btn btn-lg btn-outline-secondary align-center" value="Update">
     </div>
   </div>
 </form>
+</div>
 
 
 {% endblock %}

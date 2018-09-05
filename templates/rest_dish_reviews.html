@@ -5,10 +5,9 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>Reviews tagged with "{{ dish.name }}" at {{ restaurant.name }}:</h2>
-<br>
-
 <div class="container-fluid">
+  <h2 class="mb-4">Reviews tagged with "{{ dish.name }}" at {{ restaurant.name }}:</h2>
+
   <div class="card-columns">
     {% for review in reviews %}
       <div class="card">
@@ -100,7 +99,7 @@
 
 <hr>
  <p>
-    <a href="/restaurant/{{ restaurant.restaurant_id }}"><< All reviews</a>
+    <a href="/restaurant/{{ restaurant.restaurant_id }}"><< All {{ restaurant.name }} reviews</a>
 </p>
 </div>
 

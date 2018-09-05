@@ -1,20 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>{{ dish.name }}</h2>
+<div class="container-fluid">
+    <h1>Restaurants with reviews matching "{{ dish.name }}"</h1>
 
-{% for result in results %}
-    <p>
-        Restaurant name: <a href="/restaurant/{{ result[1].restaurant_id }}">{{ result[1].name }}</a>
-        <br>
-        Rating for tagged reviews: {{ result[0]}}
-        <br>
-        <form action="/dish-reviews/{{ dish.dish_id }}/{{ result[1].restaurant_id }}">
-            <input type="submit" value="Reviews containing {{ dish.name }}">
-        </form>
-        
-    </p>
-{% endfor %}
+    {% for result in results %}
+    <div class="row my-4">
+        <div class="col-4">
+            <a href="/restaurant/{{ result[1].restaurant_id }}"><h5 class="my-0">{{ result[1].name }}</h5></a>
+            Rating for {{ dish.name }} reviews: {{ result[0]}}
+        </div>
+        <div class="col my-auto">
+            <form action="/dish-reviews/{{ dish.dish_id }}/{{ result[1].restaurant_id }}">
+                <input type="submit" class="btn btn-outline-secondary"value="Read reviews">
+            </form>
+        </div>
+    </div>
+            
+    {% endfor %}
 
+</div>
 
 {% endblock %}
