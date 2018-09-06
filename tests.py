@@ -103,6 +103,18 @@ class RouteTestsLoggedOut(unittest.TestCase):
         self.assertIn(b'You must be logged in to update preferences',
                       result.data)
 
+    def test_preferences_page(self):
+
+        result = self.client.get('/preferences', follow_redirects=True)
+
+        self.assertIn(b'Please log in to view this page', result.data)
+
+    def test_review_page(self):
+
+        result = self.client.get('/review-form', follow_redirects=True)
+
+        self.assertIn(b'Please log in to add a review', result.data)
+
 
 class RouteTestsLoggedIn(unittest.TestCase):
 
@@ -193,6 +205,15 @@ class RouteTestsLoggedIn(unittest.TestCase):
                                    follow_redirects=True)
         self.assertIn(b'User preferences updated', result.data)
 
+    def test_review_form(self):
+
+        result = self.client.get('/review-form', query_string=
+                                  {'restaurant-name': 'Farmhouse Kitchen',
+                                  'restaurant-id': 'ChIJNZloNTd-j4ARxGMOXZp7KfI'},
+                                  follow_redirects=True)
+
+        self.assertIn(b'Add a rating for Farmhouse Kitchen', result.data)
+
 
 class ServerTests(unittest.TestCase):
 
@@ -275,6 +296,81 @@ class RestaurantTests(unittest.TestCase):
         query = "SELECT last_value FROM dishes_dish_id_seq;"
         cursor = server.db.session.execute(query).fetchone()
         self.assertEqual(cursor[0], 10)
+
+    def test_additional_api_search(self):
+
+        def _mock_api_call(page):
+            return {'results':[{"place_id": "ChIJfcaly4eAhYARSIvvfFpH64w",
+                                "name": "Tropisueno", "formatted_address": "Yerba"},
+                               {"place_id": "fake-id", "name": "Not Real", 
+                                "formatted_address": "Foo Bar"}]}
+
+        server.additional_results_api_call = _mock_api_call
+
+        seed.load_restaurants()
+        seed.load_users()
+        seed.load_reviews()
+
+        result = self.client.get('/restaurant-search/page/2.json')
+
+        self.assertIn(b'Tropisueno', result.data)
+
+        self.assertIn(b'Not Real', result.data)
+
+        self.assertIn(b'null', result.data)
+
+    def test_place_id_search(self):
+
+        def _mock_api_call(place_id):
+            return server.Restaurant.query.filter_by(restaurant_id=
+                                                    'ChIJfcaly4eAhYARSIvvfFpH64w'
+                                                     ).first()
+
+        server.get_place_details = _mock_api_call
+
+        seed.load_restaurants()
+        seed.load_users()
+        seed.load_reviews()
+
+        result_in_db = self.client.get('/restaurant/ChIJNZloNTd-j4ARxGMOXZp7KfI',
+                                        follow_redirects=True)
+
+        result_not_in_db = self.client.get('/restaurant/foo',
+                                            follow_redirects=True)
+
+        self.assertIn(b'710 Florida St', result_in_db.data)
+
+        self.assertIn(b'75 Yerba Buena Ln', result_not_in_db.data)
+
+
+class UserTests(unittest.TestCase):
+
+    def setUp(self):
+        server.app.config['TESTING'] = True
+        self.client = server.app.test_client()
+
+        # Connect to test database
+        server.connect_to_db(server.app, "postgresql:///fakedb")
+
+        # Create tables and add sample data
+        server.db.create_all()
+        server.example_data()
+
+    def test_user_search(self):
+
+        result = self.client.get('/user-search', 
+                                  query_string={'search-name': 'ja'},
+                                  follow_redirects=True)
+        
+        self.assertIn(b'Jack', result.data)
+        self.assertIn(b'Jane', result.data)
+
+    def test_user_profile(self):
+
+        result = self.client.get('/user/1')
+        self.assertIn(b'23321', result.data)
+
+
 
 
 

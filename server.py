@@ -782,7 +782,7 @@ def calculate_individual_ratings(reviews):
     averages for each category"""
 
     if len(reviews) == 0:
-        return 0.0;
+        return (0.0, 0.0, 0.0);
 
     food_sum = 0.0
     service_sum = 0.0
@@ -824,7 +824,7 @@ def example_data():
     hashed_pw_jack = bcrypt.hashpw(b"hellojack", salt)
 
     jane = User(user_id=1, email='jane@gmail.com', fname='Jane', lname='Doe',
-                password=hashed_pw_jane.decode('utf-8'))
+                password=hashed_pw_jane.decode('utf-8'), zipcode='23321')
     jack = User(user_id=2, email='jack@gmail.com', fname='Jack', lname='Dee',
                 password=hashed_pw_jack.decode('utf-8'))
 

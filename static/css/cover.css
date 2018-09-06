@@ -27,8 +27,7 @@ a:hover {
 html,
 body {
   height: 100%;
- /* background-color: #333;*/
-  background-image: url("https://images.unsplash.com/photo-1495214783159-3503fd1b572d?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=91d35d2b5386e7dd13bd3b2538eab428&auto=format&fit=crop&w=1650&q=80");
+  /*background-image: url("https://images.unsplash.com/photo-1495214783159-3503fd1b572d?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=91d35d2b5386e7dd13bd3b2538eab428&auto=format&fit=crop&w=1650&q=80");*/
   background-color: rgba(220, 220, 220, 0.5);
 }
 
@@ -36,7 +35,7 @@ body {
   display: -ms-flexbox;
   display: flex;
   color: #fff;
-  text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
+  text-shadow: .1rem .1rem .1rem  rgba(0, 0, 0, .5);
   box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
 }
 
@@ -45,7 +44,8 @@ h2, h3, h4, h5, h6 {
 }
 
 h1{
-  font-size: 43px;
+  font-size: 40px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .cover-container {
@@ -58,6 +58,7 @@ h1{
  */
 .masthead {
   margin-bottom: 2rem;
+  font-family: 'Quicksand', sans-serif;
 }
 
 .masthead-brand {
@@ -67,14 +68,14 @@ h1{
 .nav-masthead .nav-link {
   padding: .25rem 0;
   font-weight: 700;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, .8);
   background-color: transparent;
   border-bottom: .25rem solid transparent;
 }
 
 .nav-masthead .nav-link:hover,
 .nav-masthead .nav-link:focus {
-  border-bottom-color: rgba(255, 255, 255, .25);
+  border-bottom-color: rgba(255, 255, 255, .7);
 }
 
 .nav-masthead .nav-link + .nav-link {
@@ -105,6 +106,26 @@ h1{
 .cover .btn-lg {
   padding: .75rem 1.25rem;
   font-weight: 700;
+}
+
+.btn {
+      font-family: 'Montserrat', sans-serif;
+}
+.img-bkd{
+  display: flex;
+  width: 100%;
+  /*background-color: */
+  /*rgba(123, 119, 112, 0.2);*/
+  /*rgba(105, 99, 92, 0.2);*/
+  background: url(/static/img/cover.jpeg) no-repeat center center;
+  background-size: cover;
+}
+p {
+  font-family: 'Quicksand', sans-serif;
+}
+#cover-box {
+  background-color: rgba(0,0,0, .35);
+  /*box-shadow: inset 0 0 5rem rgba(0, 0, 0, .3);*/
 }
 
 

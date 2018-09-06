@@ -2,8 +2,9 @@
 
 from sqlalchemy import func
 from datetime import datetime
+import random
 import bcrypt
-from model import Restaurant, User, Review, Dish, ReviewDish, RestaurantDish
+from model import Restaurant, User, Review, Photo, Dish, ReviewDish, RestaurantDish
 from model import connect_to_db, db
 from server import app
 
@@ -121,6 +122,30 @@ def load_reviews():
     db.session.commit()
 
 
+def load_photos():
+    """Link photos to some reviews"""
+
+    url1 = 'http://reva-photo-uploads.s3.amazonaws.com/photo-'
+    url2 = '.jpeg'
+    photos = ['1534422298391-e4f8c172dddb','1532420633514-05d9096b4fb3',
+              '1534476429-dc25f72aa33b','1490474418585-ba9bad8fd0ea',
+              '1519233991914-26a44330ccd7','1490645935967-10de6ba17061',
+              '1535400255456-984241443b29','1476224203421-9ac39bcb3327',
+              '1532744535173-f6b6d2da1fcb','1522080213597-473dfd70215c']
+
+    # Get Farmhouse Kitchen reviews
+    reviews = Review.query.filter_by(restaurant_id='ChIJNZloNTd-j4ARxGMOXZp7KfI')
+
+    for review in reviews:
+        for n in range(random.randint(0,3)):
+            if not photos:
+                break
+            photo = Photo(review_id=review.review_id, url=url1+photos.pop()+url2)
+            db.session.add(photo)
+
+    db.session.commit()
+
+
 def load_dishes():
     """Load fake dishes into database."""
 
@@ -205,6 +230,7 @@ if __name__ == "__main__":
     load_users()
     set_val_user_id()
     load_reviews()
+    load_photos()
     load_dishes()
     set_val_dish_id()
     load_middle_tables()

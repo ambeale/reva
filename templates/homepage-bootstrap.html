@@ -7,29 +7,16 @@
     <meta name="author" content="">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-     <link href="https://fonts.googleapis.com/css?family=Quicksand|Open+Sans" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css?family=Quicksand|Montserrat" rel="stylesheet">
 
     <title>reva</title>
 
     <!-- Custom styles for this template -->
     <link href="/static/css/cover.css" rel="stylesheet">
-    <style type="text/css">
-      body:before {
-          content:"";
-          display:block;
-          position:fixed;
-          width:100%;
-          height:100%;
-          left:0;
-          top:0;
-          z-index:-1;
-          background-color: rgba(220, 220, 220, 0.6);
-      }
-    </style>
   </head>
 
   <body class="text-center">
-    <!-- <div class="opaque-bkd"> -->
+    <div class="img-bkd">
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
       {% for message in get_flashed_messages() %}
           <div class="alert alert-warning" role="alert">
@@ -43,14 +30,14 @@
         <div class="inner">
           <h3 class="masthead-brand">reva</h3>
           <nav class="nav nav-masthead justify-content-center">
-            <a class="nav-link active" href="#">Home</a>
+            <a class="nav-link active" href="#"><h5>Home</h5></a>
             {% if session.get("user_id") %}
-              <a class="nav-link" href="/logout" method="POST">Log Out</a>
+              <a class="nav-link" href="/logout" method="POST"><h5>Log Out</h5></a>
             {% else %}
-              <a class="nav-link" href="/login-form">Log In</a>
+              <a class="nav-link" href="/login-form"><h5>Log In</h5></a>
             {% endif %}
             {% if session.get("user_id") %}
-              <a class="nav-link" href="/profile">Account</a>
+              <a class="nav-link" href="/profile"><h5>Account</h5></a>
             {% endif %}
           </nav>
         </div>
@@ -59,13 +46,13 @@
       <main role="main" class="inner cover">
         <div class="p-4 rounded" id="cover-box">
           <h1 class="cover-heading">Discover your next favorite.</h1>
-          <p class="lead">reva is a collection of restaurant reviews from your friends and neighbors. Start the search for your newest favorite below.</p>
-          <div class="row">
+          <p class="lead my-4"><span id="header-text">reva is a collection of restaurant reviews from your friends and neighbors. Start the search for your newest favorite:</span></p>
+          <div class="row mb-4">
               <div class="col">
-                <button type="button" id="rest-srch-btn" href="#RestSearch" class="btn btn-outline-light btn-lg float-right" data-toggle="collapse">Search places</button>
+                <button type="button" id="rest-srch-btn" href="#RestSearch" class="btn btn-outline-light btn-lg float-center" data-toggle="collapse">Search places</button>
                 </div>
                 <div class="col">
-                <button type="button" id="dish-srch-btn" href="#DishSearch" class="btn btn-outline-light btn-lg float-left" data-toggle="collapse">Search dishes</button>
+                <button type="button" id="dish-srch-btn" href="#DishSearch" class="btn btn-outline-light btn-lg float-center" data-toggle="collapse">Search dishes</button>
                 </div>
             </div>
             <p></p>
@@ -78,8 +65,7 @@
                 <input id="restaurant-location" type="text" class="form-control" placeholder="Location" name="restaurant-location" required>
               </div>
             </div>
-            <br>
-            <input type="submit" class="btn btn-lg btn-secondary" value="Search">
+            <input type="submit" class="btn btn-lg btn-secondary mt-4" value="Search">
           </form>
           <form id="DishSearch" action="/dish-search" class="collapse">
             <div class="row">
@@ -90,8 +76,7 @@
                 <input id="dish-location" type="text" class="form-control" placeholder="Location" name="dish-location" required>
               </div>
             </div>
-            <br>
-            <input type="submit" class="btn btn-lg btn-secondary" value="Search">
+            <input type="submit" class="btn btn-lg btn-secondary mt-4" value="Search">
           </form>
         </div>
       </main>
