@@ -4,21 +4,26 @@
 <div class="container-fluid">
     <h1>Restaurants with reviews matching "{{ dish.name }}"</h1>
 
+    <div class="row mt-4">
     {% for result in results %}
-    <div class="row my-4">
-        <div class="col-4">
-            <a href="/restaurant/{{ result[1].restaurant_id }}"><h5 class="my-0">{{ result[1].name }}</h5></a>
-            Rating for {{ dish.name }} reviews: {{ result[0]}}
+    
+        <div class="col-6">
+            <div class="row my-3">
+                <div class="col-6">
+                <a href="/restaurant/{{ result[1].restaurant_id }}"><h5 class="my-0">{{ result[1].name }}</h5></a>
+                {{ dish.name }} rating: <strong>{{ result[0]}}</strong>
+                </div>
+                <div class="col my-auto">
+                    <form action="/dish-reviews/{{ dish.dish_id }}/{{ result[1].restaurant_id }}">
+                        <input type="submit" class="btn btn-outline-secondary"value="Read reviews">
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="col my-auto">
-            <form action="/dish-reviews/{{ dish.dish_id }}/{{ result[1].restaurant_id }}">
-                <input type="submit" class="btn btn-outline-secondary"value="Read reviews">
-            </form>
-        </div>
-    </div>
+    
             
     {% endfor %}
-
+    </div>
 </div>
 
 {% endblock %}
