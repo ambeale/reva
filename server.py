@@ -554,7 +554,7 @@ def restaurant_search_api_call(term, location):
 
     payload = {'query': search_term,
                 'location': "{},{}".format(lat_lng['lat'], lat_lng['lng']),
-                'type': 'restaurant' #'food', bakery, bar, cafe, supermarket, meal_takeaway, meal_delivery
+                'type': 'restaurant', #'food', bakery, bar, cafe, supermarket, meal_takeaway, meal_delivery
                 'key': os.environ['GOOGLE_API_KEY']}
     url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
