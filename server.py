@@ -23,7 +23,7 @@ app = Flask(__name__)
 app.secret_key = "betterthanyelp"
 
 # Force jinja to fail loudly
-app.jinja_env.undefined = StrictUndefined
+# app.jinja_env.undefined = StrictUndefined
 
 
 ### HOMEPAGE ROUTE ###
@@ -856,16 +856,16 @@ def delete_example_data():
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    app.debug = True
+    # app.debug = True
     # make sure templates, etc. are not cached in debug mode
-    app.jinja_env.auto_reload = app.debug
+    # app.jinja_env.auto_reload = app.debug
 
     connect_to_db(app)
 
     # Use the DebugToolbar
     # DebugToolbarExtension(app)
 
-    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+    # app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
     # app.config['UPLOAD_FOLDER'] = './static/photo-uploads'
 
     app.run(port=5000, host='0.0.0.0')
