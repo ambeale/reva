@@ -125,7 +125,7 @@ def load_reviews():
 def load_photos():
     """Link photos to some reviews"""
 
-    url1 = 'http://reva-photo-uploads.s3.amazonaws.com/photo-'
+    url1 = 'https://reva-photo-uploads.s3.amazonaws.com/photo-'
     url2 = '.jpeg'
     photos = ['1534422298391-e4f8c172dddb','1532420633514-05d9096b4fb3',
               '1534476429-dc25f72aa33b','1490474418585-ba9bad8fd0ea',

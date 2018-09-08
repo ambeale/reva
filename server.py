@@ -635,7 +635,7 @@ def add_photo_to_s3(file, user_id):
 
     s3 = boto3.client("s3", aws_access_key_id=os.environ["S3_KEY"],
                        aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"])
-    s3_location = 'http://{}.s3.amazonaws.com/'.format(os.environ["S3_BUCKET"])
+    s3_location = 'https://{}.s3.amazonaws.com/'.format(os.environ["S3_BUCKET"])
 
     # Add user_id to photo name to avoid cross-user duplicates
     filename = "userid{}_".format(user_id) + secure_filename(file.filename)
