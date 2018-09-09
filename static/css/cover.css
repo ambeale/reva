@@ -29,8 +29,8 @@ body {
   height: 100%;
   /*background-image: url("https://images.unsplash.com/photo-1495214783159-3503fd1b572d?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=91d35d2b5386e7dd13bd3b2538eab428&auto=format&fit=crop&w=1650&q=80");*/
   /*background-color: rgba(220, 220, 220, 0.5);*/
-  background: url(/static/img/cover.jpeg) center center;
-  background-size: cover;
+/*  background: url(/static/img/cover.jpeg) center center;
+  background-size: cover;*/
 }
 
 body {
@@ -113,15 +113,15 @@ h1{
 .btn {
       font-family: 'Montserrat', sans-serif;
 }
-/*.img-bkd{
+.img-bkd{
   display: flex;
   width: 100%;
-  /*background-color: */
+  /*background-color: 
   /*rgba(123, 119, 112, 0.2);*/
-/*  rgba(105, 99, 92, 0.2);
+  rgba(105, 99, 92, 0.2);
   background: url(/static/img/cover.jpeg) no-repeat center center;
   background-size: cover;
-}*/
+}
 p {
   font-family: 'Quicksand', sans-serif;
 }
