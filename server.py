@@ -549,15 +549,10 @@ def restaurant_search_api_call(term, location):
     """Call Google Places Text Search API using given search terms
     and return results"""
 
-    search_term = term.replace(" ", "+")
+    # Account for bug in google search that returns non-food places
+    search_term = term.replace(" ", "+") + "+food"
     lat_lng = get_geocoded_lat_lon(location)
-
-    COUNTRIES = set(['mexican', 'indian', 'japanese', 'ecuadorian', 'eritrean'
-                    'brazilian', 'russian', 'hawaiian', 'belgian', 'californian'])
-
-    # Account for bug in google search that returns countries instead of places
-    if search_term.lower() in COUNTRIES:
-        search_term += "+food"
+    
 
     payload = {'query': search_term,
                 'location': "{},{}".format(lat_lng['lat'], lat_lng['lng']),
