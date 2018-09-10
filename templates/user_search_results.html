@@ -9,7 +9,7 @@
         <ul class="list-group list-group-flush">
             {% for result in results %}
                 <li class="list-group-item"><a href="/user/{{ result.user_id }}">{{ result.fname }} {{ result.lname }}</a><br>
-                Location: {{ result.zipcode }}<br>
+                Location: {{ result.location }}<br>
                 Reviews: {{ result.count_reviews }}</li>
             {% endfor %}
         </ul>

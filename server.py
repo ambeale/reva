@@ -370,6 +370,10 @@ def display_user_profile_page():
 
     user_info = User.query.filter_by(user_id=user).first()
 
+    # Convert zip into city and slice off zip and country
+    location = get_geocoded_lat_lon(user_info.zipcode)
+    user_info.location = location['formatted_address'][:-11]
+
     return render_template("user_details.html", user=user_info)
 
 
@@ -444,7 +448,7 @@ def search_users():
 
     returned_users = User.query.filter(func.concat(User.fname, ' ', User.lname
                                                     ).ilike(search_term)).all()
-    user_results = calculate_user_review_count(returned_users)
+    user_results = add_additional_user_info(returned_users)
 
     return render_template("user_search_results.html", results=user_results)
 
@@ -454,6 +458,10 @@ def display_user_details(user_id):
     """Display details of a user profile"""
 
     user = User.query.filter_by(user_id=user_id).first()
+    
+    # Convert zip into city and slice off zip and country
+    location = get_geocoded_lat_lon(user.zipcode)
+    user.location = location['formatted_address'][:-11]
 
     return render_template("user_details.html", user=user)
 
@@ -551,7 +559,7 @@ def restaurant_search_api_call(term, location):
 
     # Account for bug in google search that returns non-food places
     search_term = term.replace(" ", "+") + "+food"
-    lat_lng = get_geocoded_lat_lon(location)
+    lat_lng = get_geocoded_lat_lon(location)['geometry']['location']
     
 
     payload = {'query': search_term,
@@ -627,9 +635,11 @@ def get_geocoded_lat_lon(location):
 
     # Make request to Geocoding API and return lat lng of result
     r = requests.get(url, params=payload).json()
-    lat_lng = r['results'][0]['geometry']['location']
-
-    return lat_lng
+    
+    if not r['results']:
+        r['results'].append({'formatted_address':'None'})
+    
+    return r['results'][0]
 
 
 def add_photo_to_s3(file, user_id):
@@ -803,14 +813,17 @@ def calculate_individual_ratings(reviews):
     return (food_avg, service_avg, price_avg)
 
 
-def calculate_user_review_count(user_list):
-    """Given list of Users, calculate number of reviews and add to 
-    each User object"""
+def add_additional_user_info(user_list):
+    """Given list of Users, add review count and location"""
 
-    # for each user object, add attribute for number of reviews
     for user in user_list:
+        # add attribute for number of reviews
         review_count = len(user.reviews)
         user.count_reviews = review_count
+
+        # convert zip to city
+        location = get_geocoded_lat_lon(user.zipcode)
+        user.location = location['formatted_address'][:-11]
 
     return user_list
 
